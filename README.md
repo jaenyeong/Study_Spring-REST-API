@@ -142,10 +142,10 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
       * 시스템 전체 통제가 가능하거나 진화에 관심이 없는 경우
       * 하지만 이 경우 HTTP API 등 REST API 외에 다른 단어를 사용할 것
 
-* 예제 프로젝트에서 REST API를 충족시키기 위한 방법
+* REST API를 충족시키기 위한 방법
   * Self-descriptive message
     * [1] 미디어 타입을 정의 및 IANA에 등록, 그 미디어 타입을 리소스 리턴할 때 Content-Type으로 사용
-    * [2] 브라우저들이 아직 스팩 지원 미흡하기 때문에 대안으로 HAL의 링크 데이터에 profile 링크 추가
+    * [2] 브라우저들이 아직 스펙 지원이 미흡하기 때문에 대안으로 HAL의 링크 데이터에 profile 링크 추가
   * HATEOAS
     * [1] 데이터에 링크 제공 (HAL로 링크 정의)
     * [2] 링크 헤더나 Location 제공
@@ -156,10 +156,10 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
   * 하이퍼링크를 표현하기 위해 JSON, XML 형식, 규칙 제공
     * 따라서 API의 데이터 파싱, 문서화에 집중 가능
 
-#### "Event" REST API
+### "Event" REST API
 * 이벤트 등록, 조회 및 수정 API
 
-##### GET /api/events
+#### GET /api/events
 * 이벤트 목록 조회 REST API (로그인 안 한 상태)
   * 응답에 포함할 데이터
     * 이벤트 목록
@@ -185,13 +185,13 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
   * 로그인 상태
     * 사실은 Bearer 헤더에 유효한 AccessToken이 들어있는 경우
 
-##### POST /api/events
+#### POST /api/events
 * 이벤트 생성
 
-##### GET /api/events/{id}
+#### GET /api/events/{id}
 * 특정 이벤트 조회
 
-##### PUT /api/events/{id}
+#### PUT /api/events/{id}
 * 특정 이벤트 수정
 
 #### Events API 사용 예제
@@ -232,3 +232,126 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
   * 자동 설정 (@EnableAutoConfiguration)
   * 내장 웹 서버 (의존성과 자동 설정의 일부)
   * 독립적으로 실행 가능한 JAR (pom.xml, build.gradle의 플러그인)
+
+* Lombok 설정
+  * Preference (command + ,)
+    * Build, Execution, Deployment > Compiler > Annotation Processors
+      * Enable annotation processing 체크박스 선택
+
+#### Event 생성 API 구현
+
+##### Event 클래스 구현
+* ```
+  @Getter
+  @Setter
+  @EqualsAndHashCode(of = "id")
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public class Event {
+      private Integer id;
+      private EventStatus eventStatus = EventStatus.DRAFT;
+      private boolean offline;
+      private boolean free;
+  
+      // 생성시 입력 받음
+  
+      // 이벤트 명
+      private String name;
+      // 이벤트 설명
+      private String description;
+      // 이벤트 등록 시작 시간
+      private LocalDateTime beginEnrollmentDateTime;
+      // 이벤트 등록 종료 시간
+      private LocalDateTime closeEnrollmentDateTime;
+      // 이벤트 시작 시간
+      private LocalDateTime beginEventDateTime;
+      // 이벤트 종료 시간
+      private LocalDateTime endEventDateTime;
+      // 이벤트 장소
+      private String location; // (optional) 이게 없으면 온라인 모임
+      // 이벤트 등록비
+      private int basePrice;   // (optional)
+      // 이벤트 등록비
+      private int maxPrice;    // (optional)
+      // 이벤트 참석자 제한 수
+      private int limitOfEnrollment;
+  }
+  ```
+
+* Lombok 애노테이션
+  * Lombok 애노테이션 간소화
+    * Lombok 애노테이션은 메타 애노테이션을 커스터마이징하여 모아서 사용할 수 없음
+  * @EqualsAndHasCode
+    * of를 사용하여 id 필드를 지정하는 이유
+      * 양방향 참조를 하게되는 경우에 스택 오버플로우 방지하기 위해 특정 필드만 지정
+  * @Builder
+    * @AllArgsConstructor (@NoArgsConstructor 포함) 애노테이션을 사용하는 이유
+      * 기본 생성자를 생성해주지 않음
+      * 모든 필드를 매개변수로 하는 생성자 또한 public이 아닌 package private
+      * 따라서 다른 패키지에서 객체를 생성하기 애매함
+  * @Data
+    * @EqualsAndHasCode 애노테이션까지 구현해주기 때문에 위와 같은 문제 발생
+    * 엔티티 (@Entity 애노테이션을 태깅한 곳)에는 가급적 사용하지 말 것
+
+##### Event price 정책
+* basePrice = 0, maxPrice = 100
+  * 선착순 등록
+* basePrice = 0, maxPrice = 0
+  * 무료
+* basePrice = 100, maxPrice = 0
+  * 무제한 경매 (높은 금액을 낸 사람이 등록)
+* basePrice = 100, maxPrice = 200
+  * 제한가 선착순 등록
+  * 처음부터 200을 낸 사람은 바로 등록됨
+  * 100을 내도 등록이 되나 더 많이 낸 사람에 의해 밀려 등록되지 않을 수 있음
+
+##### EventStatus enum 구현
+* ```
+  public enum EventStatus {
+      // 보이지 않는 상태
+      DRAFT,
+      // 공개한 상태
+      PUBLISHED,
+      // 등록 시작 상태
+      BEGAN_ENROLLMENT,
+      // 등록 종료 상태
+      CLOSED_ENROLLMENT,
+      // 이벤트 시작 상태
+      STARTED,
+      // 이벤트 종료 상태
+      ENDED
+  }
+  ```
+
+##### Event API 테스트 구현
+* @WebMvcTest
+  * MockMvc 빈 자동 설정
+  * 웹 관련된 빈만 등록해주는 슬라이스 테스트
+
+* MockMvc
+  * 스프링 MVC 테스트의 핵심 클래스
+  * 웹 서버를 띄우지 않고 스프링 MVC가 요청을 처리하는 과정 확인 가능
+  * 컨트롤러 테스트로 자주 사용됨
+
+* 테스트 할 것
+  * 입력값들을 전달하면 JSON 응답으로 201이 나오는지 확인
+    * Location 헤더에 생성된 이벤트를 조회할 수 있는 URI 담겨 있는지 확인
+    * id는 DB에 들어갈 때 자동생성된 값으로 나오는지 확인
+  * 입력값으로 누가 id나 eventStatus, offline, free와 같은 데이터까지 같이 주는 경우
+    * Bad_Request로 응답 vs 받기로 한 값 이외 무시
+  * 입력 데이터가 이상한 경우 Bad_Request로 응답
+    * 입력값이 이상한 경우 에러
+    * 비즈니스 로직으로 검사할 수 있는 에러
+    * 에러 응답 메시지에 에러에 대한 정보가 있어야 함
+  * 비즈니스 로직 적용 여부 응답 메시지 확인
+    * offline과 free 값 확인
+  * 응답에 HATEOAS와 profile 관련 링크가 있는지 확인
+    * self (view)
+    * update (이벤트 생성자는 수정 가능)
+    * events (목록으로 이동하는 링크)
+  * API 문서 만들기
+    * 요청 문서화
+    * 응답 문서화
+    * 링크 문서화
+    * profile 링크 추가
