@@ -41,7 +41,7 @@ public class EventController {
 
 //		URI createUri = linkTo(EventController.class).slash("{id}").toUri();
 
-		// 테스트시에는 savedEvent가 Null이기 떄문에 newEvent.getId()는 NullPointerException
+		// 테스트시에는 savedEvent가 Null이기 떄문에 savedEvent.getId()는 NullPointerException
 		// @SpringBootTest 사용 및 @MockBean 제거
 		URI createUri = linkTo(EventController.class).slash(savedEvent.getId()).toUri();
 //		event.setId(10);

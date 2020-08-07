@@ -405,3 +405,11 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 * 테스트 할 것
   * 입력값으로 누가 id나 eventStatus, offline, free와 같은 데이터까지 같이 주는 경우
     * Bad_Request로 응답 vs 받기로 한 값 이외 무시
+
+##### 제한한 입력값 이외 값이 입력되는 경우 에러 발생시키기
+* ObjectMapper 커스터마이징 (application.yaml)
+  * spring.jackson.deserialization.fail-on-unknown-properties=true
+
+* 테스트 할 것
+  * 입력값으로 누가 id나 eventStatus, offline, free와 같은 데이터까지 같이 주는 경우
+    * Bad_Request로 응답 vs 받기로 한 값 이외 무시
