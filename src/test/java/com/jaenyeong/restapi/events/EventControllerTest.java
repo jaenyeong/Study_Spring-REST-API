@@ -1,6 +1,7 @@
 package com.jaenyeong.restapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jaenyeong.restapi.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,36 @@ class EventControllerTest {
 //	EventRepository eventRepository;
 
 	@Test
+	@TestDescription("입력 값이 잘못된 경우 에러가 발생하는 테스트")
+	void createEventBadRequestWrongInput() throws Exception {
+		EventDto eventDto = wrongEventDtoBuilder();
+
+		mockMvc.perform(post("/api/events")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(eventDto))
+		)
+				.andExpect(status().isBadRequest());
+	}
+
+	private EventDto wrongEventDtoBuilder() {
+		return EventDto.builder()
+				.name("Spring")
+				.description("REST API Development with Spring")
+				// 종료일이 시작일보다 작을 때
+				.beginEnrollmentDateTime(LocalDateTime.of(2020, 8, 8, 12, 30, 20))
+				.closeEnrollmentDateTime(LocalDateTime.of(2020, 8, 7, 12, 30, 20))
+				.beginEventDateTime(LocalDateTime.of(2020, 8, 10, 12, 30, 20))
+				.endEventDateTime(LocalDateTime.of(2020, 8, 9, 12, 30, 20))
+				// 최대 가격보다 비쌀 때
+				.basePrice(10000)
+				.maxPrice(200)
+				.limitOfEnrollment(10)
+				.location("강서구 화곡동")
+				.build();
+	}
+
+	@Test
+	@TestDescription("입력 값이 비어있는 경우 에러가 발생하는 테스트")
 	void createEventBadRequestEmptyInput() throws Exception {
 		EventDto eventDto = EventDto.builder().build();
 
@@ -44,6 +75,7 @@ class EventControllerTest {
 	}
 
 	@Test
+	@TestDescription("입력 받을 수 없는 값을 사용한 경우 에러가 발생하는 테스트")
 	void createEventBadRequest() throws Exception {
 		Event event = eventBuilder();
 
@@ -75,6 +107,7 @@ class EventControllerTest {
 	}
 
 	@Test
+	@TestDescription("정상적으로 이벤트를 생성하는 테스트")
 	void createEvent() throws Exception {
 		EventDto eventdto = eventDtoBuilder();
 
