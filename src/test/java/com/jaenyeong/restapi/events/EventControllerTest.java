@@ -42,7 +42,16 @@ class EventControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(eventDto))
 		)
-				.andExpect(status().isBadRequest());
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				// 필드 에러를 먼저 삽입했기 때문에 통과
+				.andExpect(jsonPath("$[0].objectName").exists())
+				.andExpect(jsonPath("$[0].defaultMessage").exists())
+				.andExpect(jsonPath("$[0].code").exists())
+				// 필드 에러가 없는 경우를 위해 주석처리
+//				.andExpect(jsonPath("$[0].field").exists())
+//				.andExpect(jsonPath("$[0].rejectedValue").exists())
+		;
 	}
 
 	private EventDto wrongEventDtoBuilder() {
@@ -71,6 +80,7 @@ class EventControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(eventDto))
 		)
+				.andDo(print())
 				.andExpect(status().isBadRequest());
 	}
 

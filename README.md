@@ -436,3 +436,29 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
     * 입력값이 이상한 경우 에러
     * 비즈니스 로직으로 검사할 수 있는 에러
     * 에러 응답 메시지에 에러에 대한 정보가 있어야 함
+
+#### Bad Request 응답 본문
+* Errors 객체는 JSON 변환이 안되서 본문에 담을 수 없음
+  * 예제에서 생성한 Event 객체는 자바빈 규격을 준수하기 때문에 가능
+    * 내부적으로 objectMapper를 사용하여 Event 객체를 JSON으로 변환
+      * objectMapper는 BeanSerializer를 사용
+  * Errors 객체는 자바빈 규격을 준수하고 있지 않음
+
+* 커스텀 JSON Serializer 구현
+  * ``` public Class ErrorsSerializer extends JsonSerializer<Errors> ``` (Jackson JSON 제공)
+  * @JsonComponent (스프링 부트 제공)
+    * @JsonComponent 애노테이션을 사용해 구현한 ErrorsSerializer를 ObjectMapper에 등록
+
+* BindingError
+  * FieldError 와 GlobalError (ObjectError)가 있음
+  * objectName
+  * defaultMessage
+  * code
+  * field
+  * rejectedValue
+
+* 테스트 할 것
+  * 입력 데이터가 이상한 경우 Bad_Request로 응답
+    * 입력값이 이상한 경우 에러
+    * 비즈니스 로직으로 검사할 수 있는 에러
+    * 에러 응답 메시지에 에러에 대한 정보가 있어야 함
