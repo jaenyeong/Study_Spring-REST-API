@@ -33,6 +33,17 @@ class EventControllerTest {
 //	EventRepository eventRepository;
 
 	@Test
+	void createEventBadRequestEmptyInput() throws Exception {
+		EventDto eventDto = EventDto.builder().build();
+
+		mockMvc.perform(post("/api/events")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(eventDto))
+		)
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
 	void createEventBadRequest() throws Exception {
 		Event event = eventBuilder();
 

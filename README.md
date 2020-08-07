@@ -413,3 +413,26 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 * 테스트 할 것
   * 입력값으로 누가 id나 eventStatus, offline, free와 같은 데이터까지 같이 주는 경우
     * Bad_Request로 응답 vs 받기로 한 값 이외 무시
+
+#### Bad Request 처리
+* 의존성 추가
+  * 스프링 부트 최신 버전에서는 validation 모듈이 분리되었기 때문에 별도 추가
+  * ```
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.3.2.RELEASE'
+    ```
+
+* @Valid, BindingResult (또는 Errors)
+  * BindingResult는 항상 @Valid 바로 다음 인자로 사용해야 함 (스프링 MVC)
+  * @NotNull, @NotEmpty, @Min, @Max, ... 사용해서 입력값 바인딩할 때 에러 확인 가능
+
+* 도메인 Validator 생성
+  * Validator 인터페이스 없이 만들어도 상관없음
+
+* 테스트 설명용 애노테이션 생성
+  * @Target, @Retention
+
+* 테스트 할 것
+  * 입력 데이터가 이상한 경우 Bad_Request로 응답
+    * 입력값이 이상한 경우 에러
+    * 비즈니스 로직으로 검사할 수 있는 에러
+    * 에러 응답 메시지에 에러에 대한 정보가 있어야 함
