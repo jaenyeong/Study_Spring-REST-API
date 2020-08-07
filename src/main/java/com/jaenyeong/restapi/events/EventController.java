@@ -46,6 +46,8 @@ public class EventController {
 
 		Event event = modelMapper.map(eventDto, Event.class);
 
+		event.update();
+
 		// 테스트시에 파라미터로 넘겨준 Event 객체가 리포지터리에 저장되어야 목객체를 생성
 		// 하지만 파라미터를 EventDto 객체로 받고 새 Event객체를 생성, 저장시 목객체를 생성하지 않음
 		// 따라서 테스트시에는 savedEvent가 Null

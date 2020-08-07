@@ -43,6 +43,13 @@ dependencies {
 
 	// Validation
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+
+	// JUnitParams
+//	testImplementation group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'
+
+	// jupiter-params (Junit5에서 JUnitParams 호환성 문제 발생)
+	// 버전 명시 필요 (5.7.0-M1 버전 에러)
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.6.2'
 }
 
 test {

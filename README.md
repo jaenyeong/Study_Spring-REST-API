@@ -462,3 +462,72 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
     * 입력값이 이상한 경우 에러
     * 비즈니스 로직으로 검사할 수 있는 에러
     * 에러 응답 메시지에 에러에 대한 정보가 있어야 함
+
+#### 비즈니스 로직 적용
+* 테스트 할 것
+  * 비즈니스 로직 적용 여부 응답 메시지 확인
+    * offline과 free 값 확인
+
+#### 매개변수를 이용한 테스트
+* 테스트 코드 리팩토링
+  * 테스트에서 중복 코드 제거
+  * 매개변수만 바꿀 수 있으면 좋겠는데?
+  * JUnitParams
+
+* 의존성 추가
+  * ```
+    // JUnitParams
+    // testImplementation group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'
+    
+    // jupiter-params (Junit5에서 JUnitParams 호환성 문제 발생)
+    // 버전 명시 필요 (5.7.0-M1 버전 에러)
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.6.2'
+    ```
+  * 예제에서 JUnitParams 라이브러리를 사용하나 Junit4에서만 동작
+  * Junit5 사용을 위해 jupiter-params 라이브러리 사용
+
+* JupiterParams
+  * ```
+    @ParameterizedTest
+    // @CsvSource, @MethodSource 중 선택하여 사용
+    @CsvSource({"서울특별시 강서구 화곡동, true", "'', false", ", false"})
+    @MethodSource("parametersForTestOffline")
+    void testOffline(String location, boolean isOffline) throws Exception {
+        // given
+        Event event = Event.builder().location(location).build();
+        // when
+        event.update();
+        // then
+        assertThat(event.isOffline()).isEqualTo(isOffline);
+    }
+    
+    private static Stream<Arguments> parametersForTestOffline() {
+        return Stream.of(
+                Arguments.of("서울특별시 강서구 화곡동", true),
+                Arguments.of("", false),
+                Arguments.of(null, false)
+        );
+    }
+    ```
+  * ```
+    @ParameterizedTest
+    // @CsvSource, @MethodSource 중 선택하여 사용
+    @CsvSource({"0, 0, true", "0, 100, false", "100, 0, false"})
+    @MethodSource("parametersForTestFree")
+    void testFree(int basePrice, int maxPrice, boolean isFree) throws Exception {
+        // given
+        Event event = Event.builder().basePrice(basePrice).maxPrice(maxPrice).build();
+        // when
+        event.update();
+        // then
+        assertThat(event.isFree()).isEqualTo(isFree);
+    }
+    private static Object[] parametersForTestFree() {
+        return new Object[]{
+                new Object[]{0, 0, true},
+                new Object[]{100, 0, false},
+                new Object[]{0, 100, false},
+                new Object[]{100, 100, false}
+        };
+    }
+    ```

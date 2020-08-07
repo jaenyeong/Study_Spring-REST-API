@@ -2,7 +2,6 @@ package com.jaenyeong.restapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaenyeong.restapi.common.TestDescription;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -148,8 +147,10 @@ class EventControllerTest {
 //				.andExpect(header().string("Content-Type", "application/hal+json"))
 				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
 				// id, 계산이 필요한 값은 넘겨주는 값과 달라야 함
-				.andExpect(jsonPath("id").value(Matchers.not(100)))
-				.andExpect(jsonPath("free").value(Matchers.not(true)))
+//				.andExpect(jsonPath("id").value(Matchers.not(100)))
+//				.andExpect(jsonPath("free").value(Matchers.not(true)))
+				.andExpect(jsonPath("free").value(false))
+				.andExpect(jsonPath("offline").value(true))
 				.andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
 		;
 	}

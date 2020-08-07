@@ -46,4 +46,12 @@ public class Event {
 	private int maxPrice;    // (optional)
 	// 이벤트 참석자 제한 수
 	private int limitOfEnrollment;
+
+	public void update() {
+		// free (무료 여부)
+		this.free = (this.basePrice == 0) && (this.maxPrice == 0);
+
+		// offline (오프라인 여부)
+		this.offline = (this.location != null) && !(this.location.isBlank());
+	}
 }
