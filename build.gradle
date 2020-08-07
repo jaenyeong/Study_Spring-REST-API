@@ -37,6 +37,9 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+	// ModelMapper
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.3.8'
 }
 
 test {
