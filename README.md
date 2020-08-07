@@ -369,3 +369,19 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 * 테스트 할 것
   * 입력값들을 전달하면 JSON 응답으로 201이 나오는지 확인
   * id는 DB에 들어갈 때 자동생성된 값으로 나오는지 확인
+
+#### EventRepository 구현
+* Spring Data JPA
+  * JpaRepository 상속 받아 생성
+
+* Enum을 JPA 맵핑시 주의
+  * @Enumerated(EnumType.STRING)
+
+* @MockBean
+  * Mockito를 사용해서 mock 객체를 생성 후 빈으로 등록해줌
+  * 주의
+    * 기존 빈을 테스트용 빈이 대체
+
+* 테스트 할 것
+  * 입력값들을 전달하면 JSON 응답으로 201이 나오는지 확인
+  * id는 DB에 들어갈 때 자동생성된 값으로 나오는지 확인

@@ -2,6 +2,7 @@ package com.jaenyeong.restapi.events;
 
 import lombok.*;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,11 +11,15 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class Event {
 	// 식별자
+	@Id
+	@GeneratedValue
 	private Integer id;
 	// 이벤트 상태
 	@Builder.Default
+	@Enumerated(EnumType.STRING)
 	private EventStatus eventStatus = EventStatus.DRAFT;
 	// 오프라인 여부
 	private boolean offline;
