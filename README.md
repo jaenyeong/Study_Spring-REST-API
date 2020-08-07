@@ -355,3 +355,17 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
     * 응답 문서화
     * 링크 문서화
     * profile 링크 추가
+
+#### Event API 201 응답
+* @RestController
+  * @ResponseBody를 모든 메서드에 적용한 것과 동일
+
+* ResponseEntity 사용 이유
+  * 응답 코드, 헤더, 본문 등을 모두 다루기 편한 API
+
+* Location URI 생성
+  * HATEOS가 제공하는 linkTo(), methodOn() 메서드 사용
+
+* 테스트 할 것
+  * 입력값들을 전달하면 JSON 응답으로 201이 나오는지 확인
+  * id는 DB에 들어갈 때 자동생성된 값으로 나오는지 확인
