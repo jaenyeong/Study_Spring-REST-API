@@ -22,5 +22,6 @@ public class EventResource<E extends Event> extends EntityModel<Event> {
 		add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
 		add(linkTo(EventController.class).slash(event.getId()).withRel("query-events"));
 		add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+		add(linkTo(EventController.class).slash(event.getId()).withRel("/docs/index.html#resources-events-create").withRel("profile"));
 	}
 }

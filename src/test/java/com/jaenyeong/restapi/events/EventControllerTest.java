@@ -1,11 +1,14 @@
 package com.jaenyeong.restapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jaenyeong.restapi.common.RestDocsConfiguration;
 import com.jaenyeong.restapi.common.TestDescription;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,6 +16,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,6 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@WebMvcTest
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureRestDocs
+// 커스터마이징한 RestDocsMockMvcConfigurationCustomizer 클래스 사용 설정을 위해
+// RestDocsConfiguration 클래스 임포트
+@Import(RestDocsConfiguration.class)
 class EventControllerTest {
 
 	@Autowired
@@ -47,7 +59,7 @@ class EventControllerTest {
 				.andExpect(jsonPath("$[0].objectName").exists())
 				.andExpect(jsonPath("$[0].defaultMessage").exists())
 				.andExpect(jsonPath("$[0].code").exists())
-				// 필드 에러가 없는 경우를 위해 주석처리
+		// 필드 에러가 없는 경우를 위해 주석처리
 //				.andExpect(jsonPath("$[0].field").exists())
 //				.andExpect(jsonPath("$[0].rejectedValue").exists())
 		;
@@ -153,10 +165,81 @@ class EventControllerTest {
 				.andExpect(jsonPath("offline").value(true))
 				.andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
 				// 링크 정보 추가
-				.andExpect(jsonPath("_links.self").exists())
-				.andExpect(jsonPath("_links.query-events").exists())
-				.andExpect(jsonPath("_links.update-event").exists())
+				// links를 아래 document에서 확인 테스트를 진행하기 때문에 주석처리
+//				.andExpect(jsonPath("_links.self").exists())
+//				.andExpect(jsonPath("_links.query-events").exists())
+//				.andExpect(jsonPath("_links.update-event").exists())
 //				.andExpect(jsonPath("_links.profile").exists())
+				// Spring REST Docs
+//				.andDo(document("create-event"))
+				.andDo(document("create-event",
+						links(
+								linkWithRel("self").description("link to self")
+								, linkWithRel("query-events").description("link to query events")
+								, linkWithRel("update-event").description("link to update an existing event")
+								, linkWithRel("profile").description("link to profile")
+						),
+						requestHeaders(
+								headerWithName(HttpHeaders.ACCEPT).description("accept header")
+								, headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+						),
+						requestFields(
+								fieldWithPath("name").description("name of new event")
+								, fieldWithPath("description").description("description of new event")
+								, fieldWithPath("beginEnrollmentDateTime").description("beginEnrollmentDateTime of begin of new event")
+								, fieldWithPath("closeEnrollmentDateTime").description("closeEnrollmentDateTime of close of new event")
+								, fieldWithPath("beginEventDateTime").description("beginEventDateTime of begin of new event")
+								, fieldWithPath("endEventDateTime").description("endEventDateTime of end of new event")
+								, fieldWithPath("location").description("location of new event")
+								, fieldWithPath("basePrice").description("basePrice of new event")
+								, fieldWithPath("maxPrice").description("maxPrice of new event")
+								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+						),
+						responseHeaders(
+								headerWithName(HttpHeaders.LOCATION).description("location header")
+								, headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+						),
+						// responseFields 메서드 사용하는 경우
+						// 모든 필드를 문서화하지 않으면 에러 발생 (예제에서 _links)
+						responseFields(
+								fieldWithPath("id").description("identifier of new event")
+								, fieldWithPath("name").description("name of new event")
+								, fieldWithPath("description").description("description of new event")
+								, fieldWithPath("beginEnrollmentDateTime").description("beginEnrollmentDateTime of begin of new event")
+								, fieldWithPath("closeEnrollmentDateTime").description("closeEnrollmentDateTime of close of new event")
+								, fieldWithPath("beginEventDateTime").description("beginEventDateTime of begin of new event")
+								, fieldWithPath("endEventDateTime").description("endEventDateTime of end of new event")
+								, fieldWithPath("location").description("location of new event")
+								, fieldWithPath("basePrice").description("basePrice of new event")
+								, fieldWithPath("maxPrice").description("maxPrice of new event")
+								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+								, fieldWithPath("free").description("it tells if this event is free or not")
+								, fieldWithPath("offline").description("it tells if this event is offline meeting or not")
+								, fieldWithPath("eventStatus").description("event status")
+								// 모든 필드를 문서화
+								, fieldWithPath("_links.self.href").description("link to self")
+								, fieldWithPath("_links.query-events.href").description("link to query event list")
+								, fieldWithPath("_links.update-event.href").description("link to update existing event")
+								, fieldWithPath("_links.profile.href").description("link to profile")
+						)
+						// 일부분만 문서화하는 경우
+//						relaxedResponseFields(
+//								fieldWithPath("id").description("identifier of new event")
+//								, fieldWithPath("name").description("name of new event")
+//								, fieldWithPath("description").description("description of new event")
+//								, fieldWithPath("beginEnrollmentDateTime").description("beginEnrollmentDateTime of begin of new event")
+//								, fieldWithPath("closeEnrollmentDateTime").description("closeEnrollmentDateTime of close of new event")
+//								, fieldWithPath("beginEventDateTime").description("beginEventDateTime of begin of new event")
+//								, fieldWithPath("endEventDateTime").description("endEventDateTime of end of new event")
+//								, fieldWithPath("location").description("location of new event")
+//								, fieldWithPath("basePrice").description("basePrice of new event")
+//								, fieldWithPath("maxPrice").description("maxPrice of new event")
+//								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+//								, fieldWithPath("free").description("it tells if this event is free or not")
+//								, fieldWithPath("offline").description("it tells if this event is offline meeting or not")
+//								, fieldWithPath("eventStatus").description("event status")
+//						)
+				))
 		;
 	}
 

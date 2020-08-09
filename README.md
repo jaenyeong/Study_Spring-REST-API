@@ -654,3 +654,240 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
     * update (이벤트 생성자는 수정 가능)
     * events (목록으로 이동하는 링크)
   * 아직 profile 링크는 추가하지 않음
+
+### Spring REST Docs
+* 직접 작성한 문서와 Spring Test로 생성된 자동 생성 스니펫(문서 조각)을 결합하여 RESTFUL 서비스 문서화
+  * RESTFUL 서비스에 대한 정확하고 읽기 쉬운 문서 생성
+
+* REST Docs 구현
+  * andDo(document("doc-name", snippets))
+  * snippets
+    * links()
+    * requestParameters() + parameterWithName()
+    * pathParameters() + parametersWithName()
+    * requestParts() + partWithName()
+    * requestPartBody()
+    * requestPartFields()
+    * requestHeaders() + headerWithName()
+    * requestFields() + fieldWithPath()
+    * responseHeaders() + headerWithName()
+    * responseFields() + fieldWithPath()
+    * 기타
+  * Relaxed 접두어
+  * Processor
+    * preprocessRequest(prettyPrint())
+    * preprocessResponse(prettyPrint())
+
+#### Spring REST Docs 적용
+* 스프링 부트 사용시 REST Docs 자동 설정
+  * @AutoConfigureRestDocs
+    * EventControllerTest 클래스에 추가
+
+* 생성 경로
+  * EventControllerTest 클래스 createEvent 테스트 메서드 docs 경로
+    * build/generated-snippets/create-event
+      * curl-request.adoc
+      * http-request.adoc
+      * http-response.adoc
+      * httpie-request.adoc
+        * httpie CLI 툴
+      * request-body.adoc
+      * response-body.adoc
+
+* RestDocMockMvc 커스터마이징
+  * REST docs 요청 응답 포매팅을 위해 커스터마이징
+  * 방법
+    * RestDocsMockMvcConfigurationCustomizer 구현한 빈 등록
+    * @TestConfiguration
+      * 테스트에서만 사용하는 설정을 알려주는 애노테이션
+    * ```
+      @TestConfiguration
+      public class RestDocsConfiguration {
+      
+          @Bean
+          public RestDocsMockMvcConfigurationCustomizer restDocsMockMvcConfigurationCustomizer() {
+              return configurer -> {
+                  configurer.operationPreprocessors()
+                          .withRequestDefaults(prettyPrint())
+                          .withResponseDefaults(prettyPrint());
+              };
+          }
+      }
+      ```
+
+* 테스트 할 것
+   * API 문서 만들기
+     * 요청 본문 문서화
+     * 응답 본문 문서화
+     * 응답 헤더 문서화
+     * 링크 문서화
+       * profile 링크 추가
+
+#### 링크, (Req, Res) 필드와 헤더 문서화
+* 요청 필드 문서화
+  * requestFields() + fieldWithPath()
+  * responseFields() + fieldWithPath()
+  * requestHeaders() + headerWithName()
+  * responseHeaders() + headerWithName()
+  * links() + linkWithRel()
+
+* 테스트 할 것
+  * API 문서 만들기
+    * 요청 본문 문서화
+    * 응답 본문 문서화
+    * 링크 문서화
+      * self
+      * query-events
+      * update-event
+      * profile 링크 추가 (추후)
+    * 요청 헤더 문서화
+    * 요청 필드 문서화
+    * 응답 헤더 문서화
+    * 응답 필드 문서화
+
+* Relaxed 접두어
+  * 장점
+    * 문서 일부분만 테스트 가능
+  * 단점
+    * 정확한 문서 생성 불가
+
+#### 문서 빌드
+* Maven 설정
+  * ```
+    <dependency> 
+    	<groupId>org.springframework.restdocs</groupId>
+    	<artifactId>spring-restdocs-mockmvc</artifactId>
+    	<version>{project-version}</version>
+    	<scope>test</scope>
+    </dependency>
+    
+    <build>
+    	<plugins>
+    		<plugin> 
+    			<groupId>org.asciidoctor</groupId>
+    			<artifactId>asciidoctor-maven-plugin</artifactId>
+    			<version>1.5.8</version>
+    			<executions>
+    				<execution>
+    					<id>generate-docs</id>
+    					<phase>prepare-package</phase> 
+    					<goals>
+    						<goal>process-asciidoc</goal>
+    					</goals>
+    					<configuration>
+    						<backend>html</backend>
+    						<doctype>book</doctype>
+    					</configuration>
+    				</execution>
+    			</executions>
+    			<dependencies>
+    				<dependency> 
+    					<groupId>org.springframework.restdocs</groupId>
+    					<artifactId>spring-restdocs-asciidoctor</artifactId>
+    					<version>{project-version}</version>
+    				</dependency>
+    			</dependencies>
+    		</plugin>
+    	</plugins>
+    </build>
+    ```
+
+* Gradle 설정
+  * ```
+    plugins { 
+    	id "org.asciidoctor.convert" version "1.5.9.2"
+    }
+    
+    dependencies {
+    	asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor:{project-version}' 
+    	testCompile 'org.springframework.restdocs:spring-restdocs-mockmvc:{project-version}' 
+    }
+    
+    ext { 
+    	snippetsDir = file('build/generated-snippets')
+    }
+    
+    test { 
+    	outputs.dir snippetsDir
+    }
+    
+    asciidoctor { 
+    	inputs.dir snippetsDir 
+    	dependsOn test 
+    }
+    
+    bootJar {
+    	dependsOn asciidoctor 
+    	from ("${asciidoctor.outputDir}/html5") { 
+    		into 'static/docs'
+    	}
+    }
+    ```
+  * 참조
+    * https://docs.spring.io/spring-restdocs/docs/current/reference/html5/#getting-started-build-configuration
+
+* 템플릿 파일 추가
+  * maven
+    * src/main/asciidoc/index.adoc
+  * gradle
+    * src/docs/asciidoc/index.adoc
+
+* 문서 생성 (adoc 파일 기반으로 html 파일 생성 및 resource 경로 이동)
+  * maven
+    * mvn package
+      * test
+      * prepare-package :: process-asciidoc 기능
+        * 모든 adoc 파일을 html 파일로 생성
+      * prepare-package :: copy-resources 기능
+        * target/classes/static/docs 경로에 html 파일을 이동시켜줌
+  * gradle
+    * gradle build (documentation asciidoctor)
+    * gradle 설정
+      * ```
+        test {
+            outputs.dir snippetsDir
+            useJUnitPlatform()
+        }
+        
+        asciidoctor {
+        //	attributes 'snippets': snippetsDir
+            inputs.dir snippetsDir
+            dependsOn test
+        }
+        
+        asciidoctor.doFirst {
+        	println ' [doFirst Log - asciidoctor] It will be deleted docs file now! '
+        	delete file('src/main/resources/static/docs')
+        }
+        
+        asciidoctor.doLast {
+        	println ' [doLast Log - asciidoctor] Nothing is gonna work '
+        }
+        
+        task copyDocs(type: Copy) {
+            println " [Task copyDocs - dependsOn asciidoctor] "
+            dependsOn asciidoctor
+            from file("build/asciidoc/html5/")
+            into file("src/main/resources/static/docs")
+        }
+        
+        build {
+            dependsOn copyDocs
+        }
+        ```
+     
+* 문서 확인
+  * maven
+    * target/generated-docs/index.html
+    * target/classes/static/docs/index.html
+  * gradle
+    * build/asciidoc/htm5/index.html
+    * build/resources/static/docs/index.html
+
+* 테스트 할 것
+   * API 문서 만들기
+     * 요청 본문 문서화
+     * 응답 본문 문서화
+     * 응답 헤더 문서화
+     * 링크 문서화
+       * profile 링크 추가

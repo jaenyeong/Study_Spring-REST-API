@@ -77,26 +77,34 @@ public class EventController {
 		// [HATEOAS 추가]
 
 		// [1] Event 클래스에서 RepresentationModel<Event> 클래스를 상속하여 그대로 사용
-//		savedEvent.add(linkTo(EventController.class).withRel("query-events"));
 //		savedEvent.add(selfLinkBuilder.withSelfRel());
+//		savedEvent.add(linkTo(EventController.class).withRel("query-events"));
 //		savedEvent.add(selfLinkBuilder.withRel("update-event"));
+//		// 프로필 추가
+//		savedEvent.add(selfLinkBuilder.withRel("/docs/index.html#resources-events-create").withRel("profile"));
 //		return ResponseEntity.created(createUri).body(savedEvent);
 
 		// [2] EntityModel 클래스를 상속한 EventResource 구현하여 사용
 		// EventResource 생성자에 링크 설정 포함하여 사용 가능
 //		EventResource<Event> eventResource = new EventResource<>(savedEvent);
+//		return ResponseEntity.created(createUri).body(eventResource);
 
 		// [3] 또는 EntityModel 클래스 직접 사용
 //		EntityModel<Event> eventResource = EntityModel.of(savedEvent);
-//		eventResource.add(linkTo(EventController.class).withRel("query-events"));
 //		eventResource.add(selfLinkBuilder.withSelfRel());
+//		eventResource.add(linkTo(EventController.class).withRel("query-events"));
 //		eventResource.add(selfLinkBuilder.withRel("update-event"));
+//		// 프로필 추가
+//		eventResource.add(selfLinkBuilder.withRel("/docs/index.html#resources-events-create").withRel("profile"));
+//		return ResponseEntity.created(createUri).body(eventResource);
 
 		// [3-1] EntityModel 클래스 직접 사용시 Link 리스트 객체 생성 후 인자로 넘김
 		List<Link> links = Arrays.asList(
 				selfLinkBuilder.withSelfRel(),
 				selfLinkBuilder.withRel("query-events"),
-				selfLinkBuilder.withRel("update-event")
+				selfLinkBuilder.withRel("update-event"),
+				// 프로필 추가
+				selfLinkBuilder.withRel("/docs/index.html#resources-events-create").withRel("profile")
 		);
 		EntityModel<Event> eventResource = EntityModel.of(savedEvent, links);
 		return ResponseEntity.created(createUri).body(eventResource);
