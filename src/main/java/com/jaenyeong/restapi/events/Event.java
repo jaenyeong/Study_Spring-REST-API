@@ -1,18 +1,19 @@
 package com.jaenyeong.restapi.events;
 
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "id", callSuper = false)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Event {
+public class Event extends RepresentationModel<Event> {
 	// 식별자
 	@Id
 	@GeneratedValue

@@ -531,3 +531,126 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
         };
     }
     ```
+
+### Spring HATEOAS
+* HATEOAS (Hypermedia as the Engine of Application State)
+  * 다른 네트워크 애플리케이션 아키텍처와 구별되는 REST 애플리케이션 아키텍처의 구성 요소
+  * 클라이언트는 서버가 제공하는 하이퍼미디어를 통해 동적으로 정보를 제공하는 네트워크 애플리케이션과 상호작용
+
+* Spring HATEOAS (라이브러리 또는 툴)
+  * HATEOAS 원칙을 지키는 REST 아키텍처 생성을 돕는 API를 제공
+    * 링크 생성 기능 (linkTo() 메서드)
+      * 문자열 가지고 생성
+      * 컨트롤러와 메서드로 생성
+        * 컨트롤러 매핑 또는 linkTo, methodOn 등 메서드를 통해 생성
+        * 예를 들어 ``` linkTo(methodOn(Controller.class).show(2L)) ```
+      * 링크에 href, relation(기본적으로 self) 등 다시 설정 가능
+    * 리소스 생성 기능
+      * 리소스 (데이터 + 링크)
+      * 리소스는 리소스를 포함할 수 있음 (복합적-composite)
+    * 링크 찾아주는 기능
+      * Traverson
+      * LinkDiscoverers
+    * 링크
+      * HREF (하이퍼미디어 레퍼런스)
+        * URI, URL 설정
+      * REL
+        * 리소스와의 관계 표현
+          * self
+            * 자신을 가리킬 때(URI, URL)
+          * profile
+            * 응답 본문에 대한 문서로 링크
+          * update
+            * 이벤트 생성자는 수정 가능
+          * events
+            * 목록으로 이동하는 링크
+
+#### Spring HATEOAS 적용
+* 의존성 추가
+  * ```
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas', version: '2.3.2.RELEASE'
+    ```
+
+* 구현
+  * [1] Event 클래스의 RepresentationModel 클래스 상속
+    * Event 클래스
+      * ``` public class Event extends RepresentationModel<Event> {} ```
+    * EventController 클래스
+      * ```
+        savedEvent.add(linkTo(EventController.class).withRel("query-events"));
+        savedEvent.add(selfLinkBuilder.withSelfRel());
+        savedEvent.add(selfLinkBuilder.withRel("update-event"));
+        
+        return ResponseEntity.created(createUri).body(savedEvent);
+        ```
+  * [2] EntityModel 클래스를 상속한 EventResource 클래스 구현
+    * 빈으로 등록하지 않고 사용할 것
+    * EventResource 클래스
+      * EntityModel 클래스 상속
+        * ```
+          public class EventResource<E extends Event> extends EntityModel<Event> {
+              @JsonUnwrapped
+              private final Event event;
+             
+              public EventResource(Event event) {
+                  this.event = event;
+                  // 링크 정보를 생성자에서 설정하는 경우
+                  add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
+                  add(linkTo(EventController.class).withRel("query-events"));
+                  add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+              }
+          }
+          ```
+          * 내부의 Event 필드 선언
+          * Event {} 형태로 감싸고 싶지 않은 경우
+            * Event 객체내 필드들을 EventResource 클래스 안에 직접 선언
+            * @JsonUnwrapped 애노테이션 사용하여 래핑 제거
+    * EventController 클래스
+      * ```
+        // [2] EntityModel 클래스를 상속한 EventResource 구현하여 사용
+        EventResource<Event> eventResource = new EventResource<>(savedEvent);
+        
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        eventResource.add(selfLinkBuilder.withSelfRel());
+        eventResource.add(selfLinkBuilder.withRel("update-event"));
+        
+        return ResponseEntity.created(createUri).body(eventResource);
+        ```
+  * [3] EntityModel 클래스를 직접 사용
+    * EventController 클래스
+      * ```
+        // [3] 또는 EntityModel 클래스 직접 사용
+        EntityModel<Event> eventResource = EntityModel.of(savedEvent);
+        
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        eventResource.add(selfLinkBuilder.withSelfRel());
+        eventResource.add(selfLinkBuilder.withRel("update-event"));
+        
+        return ResponseEntity.created(createUri).body(eventResource);
+        ```
+      * ```
+        // EntityModel 클래스 직접 사용시 Link 리스트 객체 생성 후 인자로 넘김
+        List<Link> links = Arrays.asList(
+        //      selfLinkBuilder.slash(savedEvent.getId()).withSelfRel(),
+                selfLinkBuilder.withSelfRel(),
+                selfLinkBuilder.withRel("query-events"),
+                selfLinkBuilder.withRel("update-event")
+        );
+        
+        EntityModel<Event> eventResource = EntityModel.of(savedEvent, links);
+        
+        return ResponseEntity.created(createUri).body(eventResource);
+        ```
+
+* 변경 사항
+  * ResourceSupport > RepresentationModel
+  * Resource > EntityModel
+  * Resources > CollectionModel
+  * PagedResources > PagedModel
+
+* 테스트 할 것
+  * 응답에 HATEOAS 관련 링크가 있는지 확인
+    * self (view)
+    * update (이벤트 생성자는 수정 가능)
+    * events (목록으로 이동하는 링크)
+  * 아직 profile 링크는 추가하지 않음

@@ -50,6 +50,9 @@ dependencies {
 	// jupiter-params (Junit5에서 JUnitParams 호환성 문제 발생)
 	// 버전 명시 필요 (5.7.0-M1 버전 에러)
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.6.2'
+
+	// Spring boot starter HATEOAS
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas'
 }
 
 test {
