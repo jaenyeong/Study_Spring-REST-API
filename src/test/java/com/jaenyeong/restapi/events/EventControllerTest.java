@@ -3,6 +3,7 @@ package com.jaenyeong.restapi.events;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaenyeong.restapi.common.RestDocsConfiguration;
 import com.jaenyeong.restapi.common.TestDescription;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -16,12 +17,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -45,7 +49,86 @@ class EventControllerTest {
 
 	// SpringBootTest 사용시 주석처리
 //	@MockBean
-//	EventRepository eventRepository;
+	@Autowired
+	EventRepository eventRepository;
+
+	@Test
+	@DisplayName("30개의 이벤트를 10개씩, 두번째 페이지 조회")
+	void queryEvents() throws Exception {
+		// given
+		IntStream.range(0, 30).forEach(this::generateEvent);
+
+		// when
+		this.mockMvc.perform(
+				get("/api/events")
+						.param("page", "1")
+						.param("size", "10")
+						.param("sort", "name,DESC")
+		)
+				// then
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("page").exists())
+				.andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+				.andExpect(jsonPath("_links.self").exists())
+				.andExpect(jsonPath("_links.profile").exists())
+				.andDo(document("query-events",
+						links(
+								linkWithRel("first").description("link to first page")
+								, linkWithRel("prev").description("link to prev page")
+								, linkWithRel("self").description("link to clicked event page")
+								, linkWithRel("next").description("link to next page")
+								, linkWithRel("last").description("link to last page")
+								, linkWithRel("profile").description("link to profile")
+						),
+						requestHeaders(
+								// empty
+						),
+						requestBody(
+								// empty
+						),
+						responseHeaders(
+								headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+						),
+						responseFields(
+								fieldWithPath("_embedded.eventList[0].id").description("identifier of new event")
+								, fieldWithPath("_embedded.eventList[0].eventStatus").description("event status")
+								, fieldWithPath("_embedded.eventList[0].offline").description("it tells if this event is offline meeting or not")
+								, fieldWithPath("_embedded.eventList[0].free").description("it tells if this event is free or not")
+								, fieldWithPath("_embedded.eventList[0].name").description("name of new event")
+								, fieldWithPath("_embedded.eventList[0].description").description("description of new event")
+								, fieldWithPath("_embedded.eventList[0].beginEnrollmentDateTime").description("beginEnrollmentDateTime of begin of new event")
+								, fieldWithPath("_embedded.eventList[0].closeEnrollmentDateTime").description("closeEnrollmentDateTime of close of new event")
+								, fieldWithPath("_embedded.eventList[0].beginEventDateTime").description("beginEventDateTime of begin of new event")
+								, fieldWithPath("_embedded.eventList[0].endEventDateTime").description("endEventDateTime of end of new event")
+								, fieldWithPath("_embedded.eventList[0].location").description("location of new event")
+								, fieldWithPath("_embedded.eventList[0].basePrice").description("basePrice of new event")
+								, fieldWithPath("_embedded.eventList[0].maxPrice").description("maxPrice of new event")
+								, fieldWithPath("_embedded.eventList[0].limitOfEnrollment").description("limit of enrollment")
+								, fieldWithPath("_embedded.eventList[0]._links.self.href").description("link to profile")
+								, fieldWithPath("_links.first.href").description("link to first page")
+								, fieldWithPath("_links.prev.href").description("link to prev page")
+								, fieldWithPath("_links.self.href").description("link to clicked event page")
+								, fieldWithPath("_links.next.href").description("link to next page")
+								, fieldWithPath("_links.last.href").description("link to last page")
+								, fieldWithPath("_links.profile.href").description("link to profile")
+								, fieldWithPath("page.size").description("the size of events per page")
+								, fieldWithPath("page.totalElements").description("the number of total events")
+								, fieldWithPath("page.totalPages").description("the number of all page")
+								, fieldWithPath("page.number").description("current page")
+						)
+						)
+				)
+		;
+	}
+
+	private void generateEvent(int i) {
+		Event event = Event.builder()
+				.name("event " + i)
+				.description("test event")
+				.build();
+		this.eventRepository.save(event);
+	}
 
 	@Test
 	@TestDescription("입력 값이 잘못된 경우 에러가 발생하는 테스트")
@@ -194,6 +277,7 @@ class EventControllerTest {
 								, headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
 						),
 						requestFields(
+								// {"name":"Spring","description":"REST API Development with Spring","beginEnrollmentDateTime":"2020-08-07T12:30:20","closeEnrollmentDateTime":"2020-08-08T12:30:20","beginEventDateTime":"2020-08-09T12:30:20","endEventDateTime":"2020-08-10T12:30:20","location":"강서구 화곡동","basePrice":100,"maxPrice":200,"limitOfEnrollment":10}
 								fieldWithPath("name").description("name of new event")
 								, fieldWithPath("description").description("description of new event")
 								, fieldWithPath("beginEnrollmentDateTime").description("beginEnrollmentDateTime of begin of new event")

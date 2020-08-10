@@ -2,7 +2,6 @@ package com.jaenyeong.restapi.events;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -13,9 +12,9 @@ public class EventResource<E extends Event> extends EntityModel<Event> {
 	// 1) Event 객체내 필드들을 직접 선언
 	// 2) @JsonUnwrapped 애노테이션 사용하여 래핑 제거
 	@JsonUnwrapped
-	private final Event event;
+	private final E event;
 
-	public EventResource(Event event) {
+	public EventResource(E event) {
 		this.event = event;
 		// Type safe하지 않음
 //		add(Link.of("http://localhost:808/api/events" + event.getId()));
