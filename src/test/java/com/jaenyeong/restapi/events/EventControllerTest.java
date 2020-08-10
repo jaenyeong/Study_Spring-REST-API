@@ -59,12 +59,19 @@ class EventControllerTest {
 				.andDo(print())
 				.andExpect(status().isBadRequest())
 				// 필드 에러를 먼저 삽입했기 때문에 통과
-				.andExpect(jsonPath("$[0].objectName").exists())
-				.andExpect(jsonPath("$[0].defaultMessage").exists())
-				.andExpect(jsonPath("$[0].code").exists())
-		// 필드 에러가 없는 경우를 위해 주석처리
+//				.andExpect(jsonPath("$[0].objectName").exists())
+//				.andExpect(jsonPath("$[0].defaultMessage").exists())
+//				.andExpect(jsonPath("$[0].code").exists())
+				// ErrorResource를 반환하면서 발생하는 에러 수정
+				// > JsonArray는 unwrap이 되지 않아 데이터가 content 안에 래핑됨
+				.andExpect(jsonPath("content[0].objectName").exists())
+				.andExpect(jsonPath("content[0].defaultMessage").exists())
+				.andExpect(jsonPath("content[0].code").exists())
+
+				// 필드 에러가 없는 경우를 위해 주석처리
 //				.andExpect(jsonPath("$[0].field").exists())
 //				.andExpect(jsonPath("$[0].rejectedValue").exists())
+				.andExpect(jsonPath("_links.index").exists())
 		;
 	}
 

@@ -992,3 +992,23 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
       * A 수정시 B 와 C 모두 다시 빌드
   * 가능하다면 가급적 implementation 설정을 사용하는 것이 빌드 시간을 줄임
 
+### 인덱스 핸들러 생성
+* 인덱스 핸들러
+  * 다른 리소스에 대한 링크 제공
+  * 문서화
+
+* 구현
+  * ```
+    @GetMapping("/api")
+    public RepresentationModel<?> index() {
+        var index = new RepresentationModel<>();
+        index.add(linkTo(EventController.class).withRel("events"));
+        return index;
+    }
+    ```
+
+* 테스트 컨트롤러 리팩터링
+  * 중복 코드 제거
+  
+* 에러 리소스
+  * 인덱스로 가는 링크 제공

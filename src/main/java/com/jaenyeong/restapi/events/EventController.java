@@ -1,5 +1,7 @@
 package com.jaenyeong.restapi.events;
 
+import com.jaenyeong.restapi.common.ErrorResource;
+import com.jaenyeong.restapi.index.IndexController;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 //import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
@@ -40,13 +44,23 @@ public class EventController {
 		if (errors.hasErrors()) {
 //			return ResponseEntity.badRequest().build();
 			// errors는 JSON으로 변환할 수가 없음
-			return ResponseEntity.badRequest().body(errors);
+//			return ResponseEntity.badRequest().body(errors);
+
+			// EntityModel로 반환
+			return getErrorEntityModelResponseEntity(errors);
+			// ErrorResource로 반환
+//			return getErrorResourceResponseEntity(errors);
 		}
 
 		eventValidator.validate(eventDto, errors);
 		if (errors.hasErrors()) {
 //			return ResponseEntity.badRequest().build();
-			return ResponseEntity.badRequest().body(errors);
+//			return ResponseEntity.badRequest().body(errors);
+
+			// EntityModel로 반환
+			return getErrorEntityModelResponseEntity(errors);
+			// ErrorResource로 반환
+//			return getErrorResourceResponseEntity(errors);
 		}
 
 		Event event = modelMapper.map(eventDto, Event.class);
@@ -108,5 +122,18 @@ public class EventController {
 		);
 		EntityModel<Event> eventResource = EntityModel.of(savedEvent, links);
 		return ResponseEntity.created(createUri).body(eventResource);
+	}
+
+	private ResponseEntity<EntityModel<Errors>> getErrorEntityModelResponseEntity(Errors errors) {
+		List<Link> links = Collections.singletonList(
+				linkTo(methodOn(IndexController.class).index()).withRel("index"));
+		EntityModel<Errors> errorsEntityModel = EntityModel.of(errors, links);
+		return ResponseEntity.badRequest().body(errorsEntityModel);
+	}
+
+	private ResponseEntity<ErrorResource> getErrorResourceResponseEntity(Errors errors) {
+		ErrorResource errorResource = new ErrorResource(errors);
+		errorResource.add(linkTo(methodOn(IndexController.class).index()).withRel("index"));
+		return ResponseEntity.badRequest().body(errorResource);
 	}
 }
