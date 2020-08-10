@@ -9,22 +9,18 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -41,6 +37,22 @@ public class EventController {
 		this.eventRepository = eventRepository;
 		this.modelMapper = modelMapper;
 		this.eventValidator = eventValidator;
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getEvent(@PathVariable Integer id) {
+		Optional<Event> optionalEvent = this.eventRepository.findById(id);
+
+		if (optionalEvent.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		List<Link> links = Arrays.asList(
+				linkTo(EventController.class).slash(optionalEvent.get().getId()).withSelfRel(),
+				Link.of("/docs/index.html#resources-events-get").withRel("profile")
+		);
+
+		return ResponseEntity.ok(EntityModel.of(optionalEvent.get(), links));
 	}
 
 	@GetMapping

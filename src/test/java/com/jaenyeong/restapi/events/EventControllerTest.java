@@ -53,6 +53,72 @@ class EventControllerTest {
 	EventRepository eventRepository;
 
 	@Test
+	@DisplayName("데이터가 없는 특정 이벤트 조회")
+	void getEventNotFound() throws Exception {
+		// given
+		Event event = this.generateEvent(100);
+
+		// when
+		this.mockMvc.perform(get("/api/events/13072819", event.getId()))
+				// then
+				.andDo(print())
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	@DisplayName("기존의 특정 이벤트 한 개 조회")
+	void getEvent() throws Exception {
+		// given
+		Event event = this.generateEvent(100);
+
+		// when
+		this.mockMvc.perform(
+				get("/api/events/{id}", event.getId())
+		)
+				// then
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("name").exists())
+				.andExpect(jsonPath("id").exists())
+				.andExpect(jsonPath("_links.self").exists())
+				.andExpect(jsonPath("_links.profile").exists())
+				.andDo(document("get-an-event",
+						links(
+								linkWithRel("self").description("link to clicked event page")
+								, linkWithRel("profile").description("link to profile")
+						),
+						requestHeaders(
+								// empty
+						),
+						requestBody(
+								// empty
+						),
+						responseHeaders(
+								headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+						),
+						responseFields(
+								fieldWithPath("id").description("identifier of new event")
+								, fieldWithPath("name").description("name of new event")
+								, fieldWithPath("description").description("description of new event")
+								, fieldWithPath("beginEnrollmentDateTime").description("beginEnrollmentDateTime of begin of new event")
+								, fieldWithPath("closeEnrollmentDateTime").description("closeEnrollmentDateTime of close of new event")
+								, fieldWithPath("beginEventDateTime").description("beginEventDateTime of begin of new event")
+								, fieldWithPath("endEventDateTime").description("endEventDateTime of end of new event")
+								, fieldWithPath("location").description("location of new event")
+								, fieldWithPath("basePrice").description("basePrice of new event")
+								, fieldWithPath("maxPrice").description("maxPrice of new event")
+								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+								, fieldWithPath("free").description("it tells if this event is free or not")
+								, fieldWithPath("offline").description("it tells if this event is offline meeting or not")
+								, fieldWithPath("eventStatus").description("event status")
+								, fieldWithPath("_links.self.href").description("link to clicked event page")
+								, fieldWithPath("_links.profile.href").description("link to profile")
+						)
+				))
+		;
+	}
+
+	@Test
 	@DisplayName("30개의 이벤트를 10개씩, 두번째 페이지 조회")
 	void queryEvents() throws Exception {
 		// given
@@ -122,12 +188,12 @@ class EventControllerTest {
 		;
 	}
 
-	private void generateEvent(int i) {
+	private Event generateEvent(int i) {
 		Event event = Event.builder()
 				.name("event " + i)
 				.description("test event")
 				.build();
-		this.eventRepository.save(event);
+		return this.eventRepository.save(event);
 	}
 
 	@Test
