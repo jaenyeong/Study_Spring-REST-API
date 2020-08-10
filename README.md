@@ -939,3 +939,56 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
   * spring.datasource.driver-class-name=org.h2.Driver
   * spring.datasource.hikari.jdbc-url=jdbc:h2:mem:testdb
   * spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+### Gradle Dependencies configuration
+* implementation (former - compile)
+  * 컴파일 클래스 경로에 모듈 추가, 빌드 출력에 해당 모듈 패키징
+  * 컴파일 타임에 다른 모듈에게 해당 모듈을 유출하지 않음을 명시
+  * 따라서 해당 모듈은 런타임에만 다른 모듈에서 이용 가능
+  * 빌드 시스템이 리컴파일 해야하는 프로젝트의 양이 줄어 빌드 타임이 향상됨
+  * 해당 모듈 수정 시 직접적인 의존관계에 있는 모듈까지만 리컴파일(리빌드)
+  * 대부분 앱과 테스트 모듈은 implementation 설정을 사용해야 함
+* testImplementation (former - testCompile)
+  * 테스트에 사용되는 모듈을 선언(추가)하는데 사용
+  * implementation 설정을 확장하고 있음
+  * 빌드과정에서 배포본에 포함되지 않음
+  * 이는 멀티 프로젝트 구조에서 다른 프로젝트가 참조하는 경우에도 동일하게 적용
+* API (former - compile)
+  * 컴파일 클래스 경로와 빌드 출력에 해당 모듈 추가
+  * 해당 모듈을 다른 모듈로 의존관계를 이전하여 다른 모듈에서도 런타임, 컴파일 상관없이 모두 사용 가능함을 명시
+  * 종속된 하위 모듈 모두를 패키지에 포함
+  * api 모듈이 외부 API를 변경하면 컴파일 시 해당 모듈에 액세스 권한이 있는 모든 모듈을 다시 컴파일하기 때문에
+  * 다른 업스트림 소비자에게 이전해야 하는 모듈과만 사용해야 함
+  * 따라서 api 모듈 수가 많으면 빌드 시간이 크게 증가
+  * 별도의 모듈에 노출하지 않으려면 대신 implementation 설정을 사용할 것
+* compileOnly (former - provided)
+  * 컴파일 클래스 경로에만 의존성 추가 (빌드 출력에는 추가되지 않음)
+  * 컴파일 타임에만 의존성이 필요한 경우 유용함 (런타임 환경에는 다른 의존성을 사용한다고 가정)
+  * 즉, 라이브러리 모듈에 런타임 조건이 포함되어 의존성 사용 가능한지 확인한 다음
+  * 제공되지 않은 경우에도 계속 작동할 수 있도록 동작을 정상적으로 변경해야함
+  * 중요하지 않은 일시적인 모듈을 추가하지 않음으로써 파일 크기를 줄이는데 도움이 됨
+* testCompileOnly
+  * 테스트 컴파일 타임에만 필요한 모듈 추가
+* runtimeOnly (former - apk)
+  * 런타임 중에 사용하기 위해 빌드 출력에만 해당 모듈을 추가
+  * 즉, 컴파일 클래스 경로에 추가되지 않음
+* testRuntimeOnly
+  * 테스트 런타임에만 필요한 모듈 추가
+* annotationProcessor
+  * 주석 프로세서인 라이브러리에 모듈 추가시 사용
+  * 파일 클래스 경로를 주석 프로세서 클래스 경로에서 분리, 빌드 성능이 개선됨
+  * 컴파일 클래스 경로에서 주석 프로세서를 찾으면 컴파일 회피를 비활성화
+  * 이는 빌드시간에 부정적인 영향을 미침
+    * Gradle 5.0 이상 부터는 컴파일 클래스 경로에서 발견된 주석 프로세서를 무시함
+  * JAR 파일에 META-INF/services/javax.annotation.processing.Processor 파일이 포함되어 있는 경우
+  * 종속성이 주석 프로세서라고 가정
+* implementation vs api
+  * 'A'(implementation or api) <- 'B' <- 'C' 경우
+    * implementation
+      * 'C' 에서 'A'를 접근할 수 없음
+      * 'A' 수정 시 'B'까지 다시 빌드 
+    * api
+      * 'C' 에서 'A' 를 접근할 수 있음
+      * A 수정시 B 와 C 모두 다시 빌드
+  * 가능하다면 가급적 implementation 설정을 사용하는 것이 빌드 시간을 줄임
+
