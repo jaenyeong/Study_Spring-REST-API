@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 // 커스터마이징한 RestDocsMockMvcConfigurationCustomizer 클래스 사용 설정을 위해
 // RestDocsConfiguration 클래스 임포트
 @Import(RestDocsConfiguration.class)
+// 테스트 설정 파일 사용 (H2 InMemory DB)
+@ActiveProfiles("test")
 class EventControllerTest {
 
 	@Autowired

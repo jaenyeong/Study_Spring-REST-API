@@ -30,9 +30,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
-//    testImplementation 'com.h2database:h2'
-//	runtimeOnly 'org.postgresql:postgresql'
-    compileOnly 'org.postgresql:postgresql'
+    testImplementation 'com.h2database:h2'
+//    runtimeOnly 'org.postgresql:postgresql'
+//    compileOnly 'org.postgresql:postgresql'
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -71,12 +72,12 @@ asciidoctor {
 
 // 태스크 전 resource/static/docs 경로에 있는 Spring docs 파일 삭제
 asciidoctor.doFirst {
-	println ' [doFirst Log - asciidoctor] It will be deleted docs file now! '
-	delete file('src/main/resources/static/docs')
+    println ' [doFirst Log - asciidoctor] It will be deleted docs file now! '
+    delete file('src/main/resources/static/docs')
 }
 
 asciidoctor.doLast {
-	println ' [doLast Log - asciidoctor] Nothing is gonna work '
+    println ' [doLast Log - asciidoctor] Nothing is gonna work '
 }
 
 // resource/static/docs 경로에 Spring docs 파일(index.html) 복사
