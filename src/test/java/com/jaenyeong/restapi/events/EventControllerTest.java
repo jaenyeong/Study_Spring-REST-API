@@ -2,7 +2,6 @@ package com.jaenyeong.restapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaenyeong.restapi.common.RestDocsConfiguration;
-import com.jaenyeong.restapi.common.TestDescription;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -76,7 +75,7 @@ class EventControllerTest {
 	}
 
 	@Test
-	@DisplayName("비어 있는 입력 값 이벤트 수정 시 요청 실패")
+	@DisplayName("빈 값을 사용하여 이벤트 수정 시 요청 실패")
 	void updateEventBadRequest400EmptyValue() throws Exception {
 		// given
 		Event savedEvent = this.generateEvent(200);
@@ -97,7 +96,7 @@ class EventControllerTest {
 	}
 
 	@Test
-	@DisplayName("입력 값이 잘못된 경우 이벤트 수정 시 요청 실패")
+	@DisplayName("잘못된 입력 값을 사용하여 이벤트 수정 시 요청 실패")
 	void updateEventBadRequest400WrongValue() throws Exception {
 		// given
 		Event savedEvent = this.generateEvent(200);
@@ -120,7 +119,7 @@ class EventControllerTest {
 	}
 
 	@Test
-	@DisplayName("특정 이벤트 수정")
+	@DisplayName("존재하는 특정 이벤트 수정")
 	void updateEvent() throws Exception {
 		// given
 		Event savedEvent = this.generateEvent(200);
@@ -187,7 +186,7 @@ class EventControllerTest {
 	}
 
 	@Test
-	@DisplayName("데이터가 없는 특정 이벤트 조회")
+	@DisplayName("존재하지 않는 특정 이벤트 조회")
 	void getEventNotFound() throws Exception {
 		// given
 		Event event = this.generateEvent(100);
@@ -200,7 +199,7 @@ class EventControllerTest {
 	}
 
 	@Test
-	@DisplayName("기존의 특정 이벤트 한 개 조회")
+	@DisplayName("기존의 존재하는 특정 이벤트 한 개 조회")
 	void getEvent() throws Exception {
 		// given
 		Event event = this.generateEvent(100);
@@ -342,7 +341,8 @@ class EventControllerTest {
 	}
 
 	@Test
-	@TestDescription("입력 값이 잘못된 경우 에러가 발생하는 테스트")
+//	@TestDescription("입력 값이 잘못된 경우 에러가 발생하는 테스트")
+	@DisplayName("잘못된 입력 값을 사용하여 이벤트 데이터 생성 시 에러 발생")
 	void createEventBadRequestWrongInput() throws Exception {
 		EventDto eventDto = wrongEventDtoBuilder();
 
@@ -387,7 +387,8 @@ class EventControllerTest {
 	}
 
 	@Test
-	@TestDescription("입력 값이 비어있는 경우 에러가 발생하는 테스트")
+//	@TestDescription("입력 값이 비어있는 경우 에러가 발생하는 테스트")
+	@DisplayName("빈 값을 사용하여 이벤트 생성 시 에러 발생")
 	void createEventBadRequestEmptyInput() throws Exception {
 		EventDto eventDto = EventDto.builder().build();
 
@@ -400,7 +401,8 @@ class EventControllerTest {
 	}
 
 	@Test
-	@TestDescription("입력 받을 수 없는 값을 사용한 경우 에러가 발생하는 테스트")
+//	@TestDescription("입력 받을 수 없는 값을 사용한 경우 에러가 발생하는 테스트")
+	@DisplayName("입력 받을 수 없는 값을 사용하여 이벤트 생성 시 에러 발생")
 	void createEventBadRequest() throws Exception {
 		Event event = eventBuilder();
 
@@ -432,7 +434,8 @@ class EventControllerTest {
 	}
 
 	@Test
-	@TestDescription("정상적으로 이벤트를 생성하는 테스트")
+//	@TestDescription("정상적으로 이벤트를 생성하는 테스트")
+	@DisplayName("정상적으로 이벤트를 생성하는 테스트")
 	void createEvent() throws Exception {
 		EventDto eventdto = eventDtoBuilder();
 
