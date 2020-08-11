@@ -1077,14 +1077,44 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 ### Spring Security
 * 스프링 시큐리티
   * 웹 시큐리티 (Filter 기반 시큐리티)
+    * 웹 요청에 보안 (인증, 인가) 처리
+    * 시큐리티 필터 체인 (서블릿 필터)
+    * 절차
+      * [1] 웹 요청
+      * [2] 서블릿 필터(DelegatingFilterProxy > FilterChainProxy)가 가로챔
+        * FilterChainProxy가 필터 체인 목록을 가지고 있음
+      * [3] 웹 시큐리티 인터셉터로 요청이 전달됨
+      * [4] 필터 체인 적용 여부를 확인
+      * [5] 필터 체인 적용시 SecurityContextHolder(ThreadLocal 객체)에서 인증 정보를 꺼냄
+        * 인증 정보(Authentication)
+      * [6] 꺼낸 데이터 유무를 통해 인증된 유저 여부 확인
+        * 없는 경우 AuthenticationManager를 사용해 로그인
+          * AuthenticationManager가 사용하는 2가지 인터페이스
+            * UserDetailsService
+            * PasswordEncoder
+          * BasicAuthentication
+            * 인증 요청 헤더의 Authentication, Basic, usernamePassword 등을 합친 것을 인코딩한 문자열을 입력 받음
+            * UserDetailsService 인터페이스를 사용하여 입력받은 username에 매핑된 password 정보를 가져옴
+            * passwordEncoder 인터페이스를 사용하여 입력받은 password와 가져온 password 데이터 일치 여부 확인
+            * 로그인 처리 후 Authentication 객체를 생성하여 SecurityContextHolder에 담음
+      * [7] 요청(리소스)에 관한 권한을 확인
+        * User의 Role을 통해 처리
   * 메서드 시큐리티
-  * 웹 시큐리티, 메서드 시큐리티 모두 Security Interceptor를 사용
+    * 웹 요청은 별개로 메서드 호출 시 보안 (인증, 인가) 처리
+    * 예를 들어 AOP, 프록시
+  * 웹 시큐리티, 메서드 시큐리티 모두 시큐리티 인터셉터(Security Interceptor 인터페이스)를 사용
   * 리소스 접근 허용 여부를 결정하는 로직이 들어있음
 
 * 의존성 추가
   * ```
     implementation group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.3.2.RELEASE'
     ```
+
+* UserDetailsService 구현
+  * 예외 테스트
+    * expected
+    * @Rule ExpectedException
+    * try-catch
 
 * 의존성 추가시 테스트 깨짐 (401 Unauthorized)
   * 스프링 부트가 제공하는 스프링 시큐리티 기본 설정 때문
