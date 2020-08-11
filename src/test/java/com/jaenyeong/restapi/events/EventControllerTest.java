@@ -1,20 +1,12 @@
 package com.jaenyeong.restapi.events;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jaenyeong.restapi.common.RestDocsConfiguration;
+import com.jaenyeong.restapi.common.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
@@ -29,29 +21,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 //@WebMvcTest
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-// 커스터마이징한 RestDocsMockMvcConfigurationCustomizer 클래스 사용 설정을 위해
-// RestDocsConfiguration 클래스 임포트
-@Import(RestDocsConfiguration.class)
-// 테스트 설정 파일 사용 (H2 InMemory DB)
-@ActiveProfiles("test")
-class EventControllerTest {
+//@SpringBootTest
+//@AutoConfigureMockMvc
+//@AutoConfigureRestDocs
+//// 커스터마이징한 RestDocsMockMvcConfigurationCustomizer 클래스 사용 설정을 위해
+//// RestDocsConfiguration 클래스 임포트
+//@Import(RestDocsConfiguration.class)
+//// 테스트 설정 파일 사용 (H2 InMemory DB)
+//@ActiveProfiles("test")
+class EventControllerTest extends BaseControllerTest {
 
-	@Autowired
-	MockMvc mockMvc;
+//	@Autowired
+//	MockMvc mockMvc;
 
-	@Autowired
-	ObjectMapper objectMapper;
+//	@Autowired
+//	ObjectMapper objectMapper;
+
+//	@Autowired
+//	ModelMapper modelMapper;
 
 	// SpringBootTest 사용시 주석처리
 //	@MockBean
 	@Autowired
 	EventRepository eventRepository;
-
-	@Autowired
-	ModelMapper modelMapper;
 
 	@Test
 	@DisplayName("존재하지 않는 이벤트 데이터 수정 시 요청 실패")
