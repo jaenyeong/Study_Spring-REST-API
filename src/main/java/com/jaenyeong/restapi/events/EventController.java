@@ -39,6 +39,41 @@ public class EventController {
 		this.eventValidator = eventValidator;
 	}
 
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updateEvent(@PathVariable Integer id, @Valid @RequestBody EventDto eventDto, Errors errors) {
+		Optional<Event> optionalEvent = this.eventRepository.findById(id);
+
+		if (optionalEvent.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		if (errors.hasErrors()) {
+			return getErrorEntityModelResponseEntity(errors);
+//			return getErrorResourceResponseEntity(errors);
+		}
+
+		this.eventValidator.validate(eventDto, errors);
+
+		if (errors.hasErrors()) {
+			return getErrorEntityModelResponseEntity(errors);
+//			return getErrorResourceResponseEntity(errors);
+		}
+
+		// 트랜잭션이 아니기 때문에 변경사항이 더티체킹되어 저장되지 않기 때문에
+		// 명시적으로 저장소에 저장
+		Event existingEvent = optionalEvent.get();
+		this.modelMapper.map(eventDto, existingEvent);
+		Event savedEvent = this.eventRepository.save(existingEvent);
+
+		List<Link> links = Arrays.asList(
+				linkTo(EventController.class).slash(existingEvent.getId()).withSelfRel(),
+				Link.of("/docs/index.html#resources-events-update").withRel("profile")
+		);
+		EntityModel<Event> eventEntityModel = EntityModel.of(savedEvent, links);
+
+		return ResponseEntity.ok(eventEntityModel);
+	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getEvent(@PathVariable Integer id) {
 		Optional<Event> optionalEvent = this.eventRepository.findById(id);
