@@ -1232,3 +1232,44 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
   * /api 이하 모든 GET 요청에 인증 필요 
     * permitAll()을 사용하여 인증이 필요없이 익명으로 접근이 가능케 할 수 있음
   * 그밖에 모은 요청도 인증 필요
+
+#### 스프링 시큐리티 OAuth 2 설정 - 인증 서버 설정
+* 의존성 추가
+  * ```
+    testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '5.3.4.RELEASE'
+    ```
+
+* 토큰 발행 테스트
+  * User
+  * Client
+  * POST /oauth/token
+    * HTTP Basic 인증 헤더 (클라이언트 아이디 + 클라이언트 시크릿)
+    * 요청 매개변수 (MultiValueMap<String, String>)
+      * grant_type (password)
+      * username
+      * password
+    * 응답에 access_token 나오는지 확인
+
+* Grant Type (Password)
+  * Grant Type
+    * 토큰 받아오는 방법
+  * 서비스 오너가 만든 클라이언트에서 사용하는 Grant Type
+
+* AuthorizationServer 설정
+  * @EnableAuthorizationServer
+  * extends AuthorizationServerConfigurerAdapter
+  * configure(AuthorizationServerSecurityConfigurer security)
+    * PasswordEncode 설정
+  * configure(ClientDetailsServiceConfigurer clients)
+    * 클라이언트 설정
+    * grantTypes
+      * password
+      * refresh_token
+    * scopes
+    * secret / name
+    * accessTokenValiditySeconds
+    * refreshTokenValiditySeconds
+  * AuthorizationServerEndpointsConfigurer
+    * tokenStore
+    * authenticationManager
+    * userDetailsService
