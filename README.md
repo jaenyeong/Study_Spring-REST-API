@@ -1073,3 +1073,42 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 * 여러 컨트롤러 간의 중복 코드 제거
   * 클래스 상속을 사용하는 방법
   * @Disabled (Junit4 -> @Ignore) 애노테이션으로 테스트로 간주되지 않도록 설정
+
+### Spring Security
+* 스프링 시큐리티
+  * 웹 시큐리티 (Filter 기반 시큐리티)
+  * 메서드 시큐리티
+  * 웹 시큐리티, 메서드 시큐리티 모두 Security Interceptor를 사용
+  * 리소스 접근 허용 여부를 결정하는 로직이 들어있음
+
+* 의존성 추가
+  * ```
+    implementation group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.3.2.RELEASE'
+    ```
+
+* 의존성 추가시 테스트 깨짐 (401 Unauthorized)
+  * 스프링 부트가 제공하는 스프링 시큐리티 기본 설정 때문
+
+#### Account 도메인 추가
+* OAuth2로 인증을 위해서 Account 구현
+  * id
+  * email
+  * password
+  * roles
+
+* AccountRoles
+  * ADMIN, USER
+
+* JPA 맵핑
+  * @Table("Users")
+
+* JPA enumeration collection mapping
+  * @ElementCollection(fetch = FetchType.EAGER)
+  * @Enumerated(EnumType.STRING)
+  * private Set<AccountRole> roles;
+
+* Event 클래스에 owner 추가
+  * ```
+    @ManyToOne
+    Account manager;
+    ```

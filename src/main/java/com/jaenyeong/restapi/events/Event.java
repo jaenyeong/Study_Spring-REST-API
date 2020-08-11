@@ -1,5 +1,6 @@
 package com.jaenyeong.restapi.events;
 
+import com.jaenyeong.restapi.accounts.Account;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -47,6 +48,9 @@ public class Event extends RepresentationModel<Event> {
 	private int maxPrice;    // (optional)
 	// 이벤트 참석자 제한 수
 	private int limitOfEnrollment;
+	// 권한 설정 등을 위한 유저 정보 (단방향 참조)
+	@ManyToOne
+	private Account manager;
 
 	public void update() {
 		// free (무료 여부)
