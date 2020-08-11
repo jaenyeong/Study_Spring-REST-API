@@ -1157,3 +1157,52 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 
 * @Rule ExpectedException (Junit4)
   * 코드는 간결하면서 예외 타입과 메시지 모두 확인 가능
+
+#### 스프링 시큐리티 기본 설정
+* 시큐리티 필터를 적용하지 않음
+  * ``` /docs/index.html ```
+
+* 익명사용자 접근 가능
+  * GET
+    * ``` /api/events ```
+  * GET
+    * ``` /api/events/{id} ```
+
+* 로그인 인증 필수 접근 가능
+  * POST
+    * ``` /api/events ```
+  * PUT
+    * ``` /api/events/{id} ```
+  * 기타 (나머지 전부)
+
+* 스프링 시큐리티 OAuth 2.0
+  * AuthorizationServer
+    * OAuth2 토큰 발행(/oauth/token) 및 토큰 인증(/oauth/authorize)
+    * Oder 0 (리소스 서버 보다 우선 순위가 높음)
+  * ResourceServer
+    * 리소스 요청 인증 처리 (OAuth 2 토큰 검사)
+    * Oder 3 (이 값은 현재 고칠 수 없음)
+
+* 스프링 시큐리티 설정
+  * @EnableWebSecurity
+  * @EnableGlobalMethodSecurity
+  * extends WebSecurityConfigurerAdapter
+  * PasswordEncoder
+    * PasswordEncoderFactories.createDelegatingPasswordEncoder()
+  * TokenStore (Deprecated)
+    * InMemoryTokenStore (Deprecated)
+  * AuthenticationManagerBean
+  * configure(AuthenticationManagerBuilder auth)
+    * userDetailsService
+    * passwordEncoder
+  * configure(HttpSecurity http)
+    * ``` /docs/** ```
+      * permitAll
+  * configure(WebSecurity web)
+    * ignore
+      * ``` /docs/** ```
+      * ``` /favicon.ico ```
+    * PathRequest.toStaticResources() 사용
+
+* Spring Security 의존성 변경
+  * Spring Security oauth2 configure > Spring boot starter security
