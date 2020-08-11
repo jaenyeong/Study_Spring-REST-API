@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,33 @@ class AccountServiceTest {
 
 	@Autowired
 	AccountRepository accountRepository;
+
+	@Test
+	@DisplayName("[2] 사용자 인증 시 실패")
+	void secondFailFindByUsername() {
+		String userEmail = "NotExistingEmail@gmail.com";
+
+		try {
+			accountService.loadUserByUsername(userEmail);
+			fail("supposed to be failed");
+		} catch (UsernameNotFoundException ue) {
+			ue.printStackTrace();
+			assertTrue(ue.getMessage().contains(userEmail));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	@DisplayName("[1] 사용자 인증 시 실패")
+	void firstFailFindByUsername() {
+		String userEmail = "NotExistingEmail@gmail.com";
+
+		Exception usernameNotFoundException =
+				assertThrows(UsernameNotFoundException.class, () -> accountService.loadUserByUsername(userEmail));
+
+		assertEquals(usernameNotFoundException.getClass(), UsernameNotFoundException.class);
+	}
 
 	@Test
 	@DisplayName("사용자 인증 (이름이 아닌 이메일로 인증)")

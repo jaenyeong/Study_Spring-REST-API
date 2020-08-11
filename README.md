@@ -1142,3 +1142,18 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
     @ManyToOne
     Account manager;
     ```
+
+#### 예외 테스트
+* @Test
+  * Junit4
+    * @Test(expected)
+  * Junit5
+    * assertThrows(Exception.class, () -> {});
+  * 예외 타입만 확인 가능
+
+* try-catch
+  * 예외 타입과 메시지 확인 가능
+  * 하지만 코드가 다소 복잡
+
+* @Rule ExpectedException (Junit4)
+  * 코드는 간결하면서 예외 타입과 메시지 모두 확인 가능
