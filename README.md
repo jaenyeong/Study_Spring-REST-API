@@ -1273,3 +1273,23 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
     * tokenStore
     * authenticationManager
     * userDetailsService
+
+#### 스프링 시큐리티 OAuth 2 설정 - 리소스 서버 설정
+* 테스트 수정
+  * GET 요청 제외, 모두 엑세스 토큰을 가지고 요청 하도록 테스트 수정
+
+* ResourceServer 설정
+  * @EnableResourceServer
+  * extends ResourceServerConfigurerAdapter
+  * configure(ResourceServerSecurityConfigurer resources)
+    * 리소스 ID
+  * configure(HttpSecurity http)
+    * anonymous
+    * GET /api/**
+      * permit all
+    * POST /api/**
+      * authenticated
+    * PUT /api/**
+      * authenticated
+    * 에러 처리
+      * accessDeniedHandler(OAuth2AccessDeniedHandler())
