@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +23,9 @@ class AccountServiceTest {
 
 	@Autowired
 	AccountRepository accountRepository;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	@Test
 	@DisplayName("[2] 사용자 인증 시 실패")
@@ -58,19 +62,24 @@ class AccountServiceTest {
 		String password = "1234";
 
 		// given
-		Account account = Account.builder()
-				.email(userEmail)
-				.password(password)
-				.roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
-				.build();
+		// AppConfig 파일 runner에 Account 객체 생성, 저장 구현으로 주석처리
+//		Account account = Account.builder()
+//				.email(userEmail)
+//				.password(password)
+//				.roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+//				.build();
 
-		this.accountRepository.save(account);
+//		this.accountRepository.save(account);
+		// 비밀번호 인코딩 처리로 인해 변경
+//		Account savedAccount = this.accountService.saveAccount(account);
 
 		// when
 		UserDetailsService userDetailsService = accountService;
 		UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
 		// then
-		assertEquals(userDetails.getPassword(), password);
+//		assertEquals(userDetails.getPassword(), password);
+		// 비밀번호 인코딩 처리로 인해 변경
+		assertTrue(this.passwordEncoder.matches(password, userDetails.getPassword()));
 	}
 }

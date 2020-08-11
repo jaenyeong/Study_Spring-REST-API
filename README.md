@@ -1206,3 +1206,29 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 
 * Spring Security 의존성 변경
   * Spring Security oauth2 configure > Spring boot starter security
+
+#### 스프링 시큐리티 폼 인증 설정
+* ```
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+      http
+          .anonymous()
+              .and()
+          .formLogin()
+              .and()
+          .authorizeRequests()
+              .mvcMatchers(HttpMethod.GET, "/api/**").authenticated()
+              .anyRequest().authenticated();
+  }
+  ```
+
+* 계정 정보 저장시 비밀번호 인코딩 추가
+  * 현재 예제에서는 인증시에만 passwordEncoder 사용
+
+* 익명 사용자 사용 활성화
+* 폼 인증 방식 활성화
+  * 스프링 시큐리티가 기본 로그인 페이지 제공
+* 요청에 인증 적용
+  * /api 이하 모든 GET 요청에 인증 필요 
+    * permitAll()을 사용하여 인증이 필요없이 익명으로 접근이 가능케 할 수 있음
+  * 그밖에 모은 요청도 인증 필요
