@@ -2,6 +2,8 @@ package com.jaenyeong.restapi.events;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.jaenyeong.restapi.accounts.Account;
+import com.jaenyeong.restapi.accounts.AccountRepository;
 import com.jaenyeong.restapi.common.AppProperties;
 import com.jaenyeong.restapi.common.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -52,6 +55,9 @@ class EventControllerTest extends BaseControllerTest {
 
 	@Autowired
 	AppProperties appProperties;
+
+	@Autowired
+	AccountRepository accountRepository;
 
 	@Test
 	@DisplayName("존재하지 않는 이벤트 데이터 수정 시 요청 실패")
@@ -179,7 +185,10 @@ class EventControllerTest extends BaseControllerTest {
 								, fieldWithPath("basePrice").description("basePrice of new event")
 								, fieldWithPath("maxPrice").description("maxPrice of new event")
 								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
-								, fieldWithPath("manager").description("?")
+								, fieldWithPath("manager.id").description("manager`s id")
+								, fieldWithPath("manager.email").description("manager`s email")
+								, fieldWithPath("manager.password").description("manager`s password")
+								, fieldWithPath("manager.roles").description("manager`s roles")
 								, fieldWithPath("free").description("it tells if this event is free or not")
 								, fieldWithPath("offline").description("it tells if this event is offline meeting or not")
 								, fieldWithPath("eventStatus").description("event status")
@@ -246,7 +255,10 @@ class EventControllerTest extends BaseControllerTest {
 								, fieldWithPath("basePrice").description("basePrice of new event")
 								, fieldWithPath("maxPrice").description("maxPrice of new event")
 								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
-								, fieldWithPath("manager").description("?")
+								, fieldWithPath("manager.id").description("manager`s id")
+								, fieldWithPath("manager.email").description("manager`s email")
+								, fieldWithPath("manager.password").description("manager`s password")
+								, fieldWithPath("manager.roles").description("manager`s roles")
 								, fieldWithPath("free").description("it tells if this event is free or not")
 								, fieldWithPath("offline").description("it tells if this event is offline meeting or not")
 								, fieldWithPath("eventStatus").description("event status")
@@ -258,14 +270,15 @@ class EventControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	@DisplayName("30개의 이벤트를 10개씩, 두번째 페이지 조회")
-	void queryEvents() throws Exception {
+	@DisplayName("로그인 후 30개의 이벤트를 10개씩, 두번째 페이지 조회")
+	void queryEventsWithAuthentication() throws Exception {
 		// given
 		IntStream.range(0, 30).forEach(this::generateEvent);
 
 		// when
 		this.mockMvc.perform(
 				get("/api/events")
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
 						.param("page", "1")
 						.param("size", "10")
 						.param("sort", "name,DESC")
@@ -277,6 +290,7 @@ class EventControllerTest extends BaseControllerTest {
 				.andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
 				.andExpect(jsonPath("_links.self").exists())
 				.andExpect(jsonPath("_links.profile").exists())
+				.andExpect(jsonPath("_links.create-event").exists())
 				.andDo(document("query-events",
 						links(
 								linkWithRel("first").description("link to first page")
@@ -285,6 +299,7 @@ class EventControllerTest extends BaseControllerTest {
 								, linkWithRel("next").description("link to next page")
 								, linkWithRel("last").description("link to last page")
 								, linkWithRel("profile").description("link to profile")
+								, linkWithRel("create-event").description("link to create-event")
 						),
 						requestHeaders(
 								// empty
@@ -310,7 +325,10 @@ class EventControllerTest extends BaseControllerTest {
 								, fieldWithPath("_embedded.eventList[0].basePrice").description("basePrice of new event")
 								, fieldWithPath("_embedded.eventList[0].maxPrice").description("maxPrice of new event")
 								, fieldWithPath("_embedded.eventList[0].limitOfEnrollment").description("limit of enrollment")
-								, fieldWithPath("_embedded.eventList[0].manager").description("?")
+								, fieldWithPath("_embedded.eventList[0].manager.id").description("manager`s id")
+								, fieldWithPath("_embedded.eventList[0].manager.email").description("manager`s email")
+								, fieldWithPath("_embedded.eventList[0].manager.password").description("manager`s password")
+								, fieldWithPath("_embedded.eventList[0].manager.roles").description("manager`s roles")
 								, fieldWithPath("_embedded.eventList[0]._links.self.href").description("link to profile")
 								, fieldWithPath("_links.first.href").description("link to first page")
 								, fieldWithPath("_links.prev.href").description("link to prev page")
@@ -318,6 +336,7 @@ class EventControllerTest extends BaseControllerTest {
 								, fieldWithPath("_links.next.href").description("link to next page")
 								, fieldWithPath("_links.last.href").description("link to last page")
 								, fieldWithPath("_links.profile.href").description("link to profile")
+								, fieldWithPath("_links.create-event.href").description("link to create-event")
 								, fieldWithPath("page.size").description("the size of events per page")
 								, fieldWithPath("page.totalElements").description("the number of total events")
 								, fieldWithPath("page.totalPages").description("the number of all page")
@@ -329,6 +348,8 @@ class EventControllerTest extends BaseControllerTest {
 	}
 
 	private Event generateEvent(int i) {
+		Account admin = this.accountRepository.findByEmail(appProperties.getAdminEmail()).orElseGet(Account::new);
+
 		Event event = Event.builder()
 				.name("event " + i)
 				.description("[Test] REST API Development with Spring")
@@ -343,6 +364,8 @@ class EventControllerTest extends BaseControllerTest {
 				.free(false)
 				.offline(true)
 				.eventStatus(EventStatus.DRAFT)
+				// 이벤트 등록한 관리자 추가
+				.manager(admin)
 				.build();
 		return this.eventRepository.save(event);
 	}
@@ -534,7 +557,10 @@ class EventControllerTest extends BaseControllerTest {
 								, fieldWithPath("basePrice").description("basePrice of new event")
 								, fieldWithPath("maxPrice").description("maxPrice of new event")
 								, fieldWithPath("limitOfEnrollment").description("limit of enrollment")
-								, fieldWithPath("manager").description("?")
+								, fieldWithPath("manager.id").description("manager`s id")
+								, fieldWithPath("manager.email").description("manager`s email")
+								, fieldWithPath("manager.password").description("manager`s password")
+								, fieldWithPath("manager.roles").description("manager`s roles")
 								, fieldWithPath("free").description("it tells if this event is free or not")
 								, fieldWithPath("offline").description("it tells if this event is offline meeting or not")
 								, fieldWithPath("eventStatus").description("event status")

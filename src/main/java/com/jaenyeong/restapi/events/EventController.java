@@ -1,5 +1,7 @@
 package com.jaenyeong.restapi.events;
 
+import com.jaenyeong.restapi.accounts.Account;
+import com.jaenyeong.restapi.accounts.CurrentUser;
 import com.jaenyeong.restapi.common.ErrorResource;
 import com.jaenyeong.restapi.index.IndexController;
 import org.modelmapper.ModelMapper;
@@ -10,6 +12,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -39,7 +42,14 @@ public class EventController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateEvent(@PathVariable Integer id, @Valid @RequestBody EventDto eventDto, Errors errors) {
+	public ResponseEntity<?> updateEvent(@PathVariable Integer id,
+	                                     @Valid @RequestBody EventDto eventDto,
+	                                     Errors errors,
+	                                     @CurrentUser Account currentUser) {
+		if (currentUser == null) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
 		Optional<Event> optionalEvent = this.eventRepository.findById(id);
 
 		if (optionalEvent.isEmpty()) {
@@ -61,6 +71,12 @@ public class EventController {
 		// 트랜잭션이 아니기 때문에 변경사항이 더티체킹되어 저장되지 않기 때문에
 		// 명시적으로 저장소에 저장
 		Event existingEvent = optionalEvent.get();
+
+		// 로그인 유저와 해당 이벤트의 관리자 정보가 일치하지 않는 경우
+		if (!(existingEvent.getManager().equals(currentUser))) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
 		this.modelMapper.map(eventDto, existingEvent);
 		Event savedEvent = this.eventRepository.save(existingEvent);
 
@@ -74,23 +90,42 @@ public class EventController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getEvent(@PathVariable Integer id) {
+	public ResponseEntity<?> getEvent(@PathVariable Integer id, @CurrentUser Account currentUser) {
 		Optional<Event> optionalEvent = this.eventRepository.findById(id);
 
 		if (optionalEvent.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
+		Event event = optionalEvent.get();
 		List<Link> links = Arrays.asList(
-				linkTo(EventController.class).slash(optionalEvent.get().getId()).withSelfRel(),
+				linkTo(EventController.class).slash(event.getId()).withSelfRel(),
 				Link.of("/docs/index.html#resources-events-get").withRel("profile")
 		);
 
-		return ResponseEntity.ok(EntityModel.of(optionalEvent.get(), links));
+		EntityModel<Event> eventEntityModel = EntityModel.of(event, links);
+
+		// 관리자인 경우 조회 이벤트 수정 링크 추가
+		if (event.getManager().equals(currentUser)) {
+			eventEntityModel.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+		}
+
+		return ResponseEntity.ok(eventEntityModel);
 	}
 
 	@GetMapping
-	public ResponseEntity<?> queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
+	public ResponseEntity<?> queryEvents(Pageable pageable,
+	                                     PagedResourcesAssembler<Event> assembler,
+//	                                     @AuthenticationPrincipal User user
+//	                                     @AuthenticationPrincipal AccountAdapter currentUser
+//	                                     @AuthenticationPrincipal(expression = "account") Account account
+	                                     // 애노테이션 커스터마이징
+	                                     @CurrentUser Account account
+	) {
+
+//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//		User principal = (User) authentication.getPrincipal();
+
 		Page<Event> page = this.eventRepository.findAll(pageable);
 
 		var pageResources = assembler.toModel(page, e -> {
@@ -98,13 +133,20 @@ public class EventController {
 			return EntityModel.of(e, link);
 		});
 		pageResources.add(Link.of("/docs/index.html#resources-events-list").withRel("profile"));
+
+		// 로그인 여부 판단하여 이벤트 생성 링크 추가
+		if (account != null) {
+			pageResources.add(linkTo(EventController.class).withRel("create-event"));
+		}
 		return ResponseEntity.ok(pageResources);
 	}
 
 	@PostMapping
 //	public ResponseEntity<?> createEvent(@RequestBody Event event) {
 //	public ResponseEntity<?> createEvent(@RequestBody EventDto eventDto) {
-	public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+	public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto,
+	                                     Errors errors,
+	                                     @CurrentUser Account currentUser) {
 		if (errors.hasErrors()) {
 //			return ResponseEntity.badRequest().build();
 			// errors는 JSON으로 변환할 수가 없음
@@ -130,6 +172,8 @@ public class EventController {
 		Event event = modelMapper.map(eventDto, Event.class);
 
 		event.update();
+
+		event.setManager(currentUser);
 
 		// 테스트시에 파라미터로 넘겨준 Event 객체가 리포지터리에 저장되어야 목객체를 생성
 		// 하지만 파라미터를 EventDto 객체로 받고 새 Event객체를 생성, 저장시 목객체를 생성하지 않음
