@@ -1302,3 +1302,34 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 
 * 외부 설정으로 기본 유저와 클라이언트 정보 추출
   * @ConfigurationProperties
+
+#### 이벤트 API 점검 (Postman 사용)
+* 토큰 발급
+  * POST /oauth/token
+  * BASIC authentication 헤더
+    * client Id(jaenyeongApp) + client secret(pass)
+  * 요청 본문 폼
+    * username
+      * user@gmail.com
+    * password
+      * user
+    * grant_type
+      * password
+
+* 토큰 갱신
+  * POST /oauth/token
+  * BASIC authentication 헤더
+    * client Id(jaenyeongApp) + client secret(pass)
+  * 요청 본문 폼
+    * token
+      * 처음에 발급받았던 refresh token
+    * grant_type
+      * refresh_token
+
+* 이벤트 목록 조회 API
+  * 로그인 했을 때
+  * 이벤트 생성 링크 제공
+  
+* 특정 이벤트 조회
+  * 로그인 했을 때
+  * 이벤트 관리자인 경우에는 이벤트 수정 링크 제공
