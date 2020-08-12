@@ -1,11 +1,12 @@
 package com.jaenyeong.restapi.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jaenyeong.restapi.accounts.Account;
+import com.jaenyeong.restapi.accounts.AccountSerializer;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 
 @Getter
@@ -51,6 +52,8 @@ public class Event extends RepresentationModel<Event> {
 	private int limitOfEnrollment;
 	// 권한 설정 등을 위한 유저 정보 (단방향 참조)
 	@ManyToOne
+	// Event 클래스를 직렬화하는 경우엔 Account 클래스의 id만 직렬화하도록 설정
+	@JsonSerialize(using = AccountSerializer.class)
 	private Account manager;
 
 	public void update() {

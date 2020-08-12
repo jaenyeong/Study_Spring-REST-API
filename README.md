@@ -1370,3 +1370,89 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
 
 * 수정 API 개선
   * 현재 사용자가 이벤트 owner가 아닌 경우에 403 에러 발생
+
+#### adoc 문서 출력값 제한
+* 생성 API 개선
+  * Event owner 설정
+  * 응답에서 owner의 id만 보내 줄 것
+
+* 현재 adoc 문서 출력
+  * ```
+    {
+      "id" : 3,
+      "eventStatus" : "DRAFT",
+      "offline" : true,
+      "free" : false,
+      "name" : "Spring",
+      "description" : "REST API Development with Spring",
+      "beginEnrollmentDateTime" : "2020-08-07T12:30:20",
+      "closeEnrollmentDateTime" : "2020-08-08T12:30:20",
+      "beginEventDateTime" : "2020-08-09T12:30:20",
+      "endEventDateTime" : "2020-08-10T12:30:20",
+      "location" : "강서구 화곡동",
+      "basePrice" : 100,
+      "maxPrice" : 200,
+      "limitOfEnrollment" : 10,
+      "manager" : {
+        "id" : 1,
+        "email" : "jaenyeong.dev@gmail.com",
+        "password" : "{bcrypt}$2a$10$6k/qDCVvaDJi9g8ygh9V2uA7OXKxQN7xwhuxPNuSvBo/BAFgp5sPa",
+        "roles" : [ "ADMIN", "USER" ]
+      },
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost:8080/api/events/3"
+        },
+        "query-events" : {
+          "href" : "http://localhost:8080/api/events/3"
+        },
+        "update-event" : {
+          "href" : "http://localhost:8080/api/events/3"
+        },
+        "profile" : {
+          "href" : "http://localhost:8080/api/events/3"
+        }
+      }
+    }
+    ```
+
+* 개선
+  * JsonSerializer<User> 구현
+  * @JsonSerialize(using) 설정
+
+* 개선 후 adoc 문서 출력
+  * ```
+    {
+      "id" : 3,
+      "eventStatus" : "DRAFT",
+      "offline" : true,
+      "free" : false,
+      "name" : "Spring",
+      "description" : "REST API Development with Spring",
+      "beginEnrollmentDateTime" : "2020-08-07T12:30:20",
+      "closeEnrollmentDateTime" : "2020-08-08T12:30:20",
+      "beginEventDateTime" : "2020-08-09T12:30:20",
+      "endEventDateTime" : "2020-08-10T12:30:20",
+      "location" : "강서구 화곡동",
+      "basePrice" : 100,
+      "maxPrice" : 200,
+      "limitOfEnrollment" : 10,
+      "manager" : {
+        "id" : 1
+      },
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost:8080/api/events/3"
+        },
+        "query-events" : {
+          "href" : "http://localhost:8080/api/events/3"
+        },
+        "update-event" : {
+          "href" : "http://localhost:8080/api/events/3"
+        },
+        "profile" : {
+          "href" : "http://localhost:8080/api/events/3"
+        }
+      }
+    }
+    ```
