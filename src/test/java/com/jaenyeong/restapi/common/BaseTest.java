@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @Disabled // Junit4 -> @Ignore
 @DisplayName("Base Controller Test Class")
-public class BaseControllerTest {
+public class BaseTest {
 
 	@Autowired
 	protected MockMvc mockMvc;

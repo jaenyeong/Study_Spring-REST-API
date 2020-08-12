@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.jaenyeong.restapi.accounts.Account;
 import com.jaenyeong.restapi.accounts.AccountRepository;
 import com.jaenyeong.restapi.common.AppProperties;
-import com.jaenyeong.restapi.common.BaseControllerTest;
+import com.jaenyeong.restapi.common.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -37,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@Import(RestDocsConfiguration.class)
 //// 테스트 설정 파일 사용 (H2 InMemory DB)
 //@ActiveProfiles("test")
-class EventControllerTest extends BaseControllerTest {
+class EventControllerTest extends BaseTest {
 
 //	@Autowired
 //	MockMvc mockMvc;

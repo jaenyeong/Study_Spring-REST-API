@@ -2,7 +2,7 @@ package com.jaenyeong.restapi.configs;
 
 import com.jaenyeong.restapi.accounts.AccountService;
 import com.jaenyeong.restapi.common.AppProperties;
-import com.jaenyeong.restapi.common.BaseControllerTest;
+import com.jaenyeong.restapi.common.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class AuthServerConfigTest extends BaseControllerTest {
+class AuthServerConfigTest extends BaseTest {
 	@Autowired
 	AccountService accountService;
 

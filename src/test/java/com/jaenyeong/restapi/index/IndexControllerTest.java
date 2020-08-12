@@ -1,6 +1,6 @@
 package com.jaenyeong.restapi.index;
 
-import com.jaenyeong.restapi.common.BaseControllerTest;
+import com.jaenyeong.restapi.common.BaseTest;
 import org.junit.jupiter.api.Test;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@AutoConfigureRestDocs
 //@Import(RestDocsConfiguration.class)
 //@ActiveProfiles("test")
-class IndexControllerTest extends BaseControllerTest {
+class IndexControllerTest extends BaseTest {
 
 //	@Autowired
 //	MockMvc mockMvc;
