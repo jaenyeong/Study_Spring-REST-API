@@ -2,6 +2,7 @@ package com.jaenyeong.restapi.events;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.jaenyeong.restapi.common.AppProperties;
 import com.jaenyeong.restapi.common.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,9 @@ class EventControllerTest extends BaseControllerTest {
 //	@MockBean
 	@Autowired
 	EventRepository eventRepository;
+
+	@Autowired
+	AppProperties appProperties;
 
 	@Test
 	@DisplayName("존재하지 않는 이벤트 데이터 수정 시 요청 실패")
@@ -563,17 +567,21 @@ class EventControllerTest extends BaseControllerTest {
 
 	private String getAccessToken() throws Exception {
 		// given
-		final String clientId = "jaenyeongApp";
-		final String clientSecret = "pass";
-		final String userEmail = "jaenyeong.dev@gmail.com";
-		final String password = "1234";
+		// appProperties 속성 사용
+//		final String clientId = "jaenyeongApp";
+//		final String clientSecret = "pass";
+//		final String userEmail = "jaenyeong.dev@gmail.com";
+//		final String password = "1234";
 
 		// when
 		// 인증 서버 등록 시 /oauth/token 핸들러가 적용됨
 		ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-				.with(httpBasic(clientId, clientSecret))
-				.param("username", userEmail)
-				.param("password", password)
+//				.with(httpBasic(clientId, clientSecret))
+				.with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+//				.param("username", userEmail)
+				.param("username", appProperties.getAdminEmail())
+//				.param("password", password)
+				.param("password", appProperties.getAdminPassword())
 				.param("grant_type", "password"));
 
 		var response = perform.andReturn().getResponse().getContentAsString();

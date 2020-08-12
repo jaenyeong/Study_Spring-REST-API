@@ -1293,3 +1293,12 @@ https://www.inflearn.com/course/spring_rest-api/dashboard
       * authenticated
     * 에러 처리
       * accessDeniedHandler(OAuth2AccessDeniedHandler())
+
+#### 문자열을 외부 설정으로 추출
+* 기본 유저 생성
+  * ApplicationRunner
+    * Admin
+    * User
+
+* 외부 설정으로 기본 유저와 클라이언트 정보 추출
+  * @ConfigurationProperties

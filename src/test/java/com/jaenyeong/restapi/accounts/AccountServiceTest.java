@@ -12,8 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Set;
-
 // BaseControllerTest를 상속하지 않고 구현
 @SpringBootTest
 @ActiveProfiles("test")

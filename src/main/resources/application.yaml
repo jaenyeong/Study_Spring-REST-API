@@ -29,3 +29,13 @@ logging:
               BasicBinder: TRACE
       springframework:
         security: DEBUG
+
+# Oauth2 관련 속성값 설정
+jaenyeong-app:
+  admin-email: jaenyeong.dev@gmail.com
+  user-email: user@gmail.com
+  admin-password: 1234
+  user-password: user
+  client-id: jaenyeongApp
+  client-secret: pass
+
